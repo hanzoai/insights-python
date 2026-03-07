@@ -25,14 +25,14 @@ with open("pyproject.toml", "rb") as f:
 config["project"]["name"] = "posthoganalytics"
 config["project"]["readme"] = "README_ANALYTICS.md"
 
-# Rename packages from posthog.* to posthoganalytics.*
+# Rename packages from hanzoanalytics.* to posthoganalytics.*
 if "packages" in config["tool"]["setuptools"]:
     new_packages = []
     for package in config["tool"]["setuptools"]["packages"]:
-        if package == "posthog":
+        if package == "hanzoanalytics":
             new_packages.append("posthoganalytics")
-        elif package.startswith("posthog."):
-            new_packages.append(package.replace("posthog.", "posthoganalytics.", 1))
+        elif package.startswith("hanzoanalytics."):
+            new_packages.append(package.replace("hanzoanalytics.", "posthoganalytics.", 1))
         else:
             new_packages.append(package)
     config["tool"]["setuptools"]["packages"] = new_packages
@@ -56,9 +56,9 @@ setup(
     # Basic fields for backward compatibility
     url="https://github.com/posthog/posthog-python",
     author="Posthog",
-    author_email="hey@posthog.com",
+    author_email="hey@hanzoanalytics.com",
     maintainer="PostHog",
-    maintainer_email="hey@posthog.com",
+    maintainer_email="hey@hanzoanalytics.com",
     license="MIT License",
     description="Integrate PostHog into any python application.",
     long_description=long_description,

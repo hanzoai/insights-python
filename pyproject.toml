@@ -3,11 +3,11 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "posthog"
+name = "hanzoanalytics"
 version = "7.9.7"
-description = "Integrate PostHog into any python application."
-authors = [{ name = "PostHog", email = "hey@posthog.com" }]
-maintainers = [{ name = "PostHog", email = "hey@posthog.com" }]
+description = "Integrate Hanzo Insights into any python application."
+authors = [{ name = "Hanzo AI", email = "hey@hanzo.ai" }]
+maintainers = [{ name = "Hanzo AI", email = "hey@hanzo.ai" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
@@ -33,8 +33,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/posthog/posthog-python"
-Repository = "https://github.com/posthog/posthog-python"
+Homepage = "https://github.com/hanzoai/insights"
+Repository = "https://github.com/hanzoai/posthog-python"
 
 [project.optional-dependencies]
 langchain = ["langchain>=0.2.0"]
@@ -80,21 +80,21 @@ test = [
 
 [tool.setuptools]
 packages = [
-    "posthog",
-    "posthog.ai",
-    "posthog.ai.langchain",
-    "posthog.ai.openai",
-    "posthog.ai.openai_agents",
-    "posthog.ai.anthropic",
-    "posthog.ai.gemini",
-    "posthog.test",
-    "posthog.test.ai",
-    "posthog.test.ai.openai_agents",
-    "posthog.integrations",
+    "hanzoanalytics",
+    "hanzoanalytics.ai",
+    "hanzoanalytics.ai.langchain",
+    "hanzoanalytics.ai.openai",
+    "hanzoanalytics.ai.openai_agents",
+    "hanzoanalytics.ai.anthropic",
+    "hanzoanalytics.ai.gemini",
+    "hanzoanalytics.test",
+    "hanzoanalytics.test.ai",
+    "hanzoanalytics.test.ai.openai_agents",
+    "hanzoanalytics.integrations",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-testpaths = ["posthog/test"]
+testpaths = ["hanzoanalytics/test"]
 norecursedirs = ["integration_tests"]
