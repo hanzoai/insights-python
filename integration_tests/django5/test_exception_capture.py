@@ -51,7 +51,7 @@ async def test_async_exception_is_captured(asgi_app):
         )
 
     # Patch at the posthog module level where middleware imports from
-    with patch("hanzoanalytics.capture_exception", side_effect=mock_capture):
+    with patch("hanzo_insights.capture_exception", side_effect=mock_capture):
         async with AsyncClient(
             transport=ASGITransport(app=asgi_app), base_url="http://testserver"
         ) as ac:
@@ -93,7 +93,7 @@ async def test_sync_exception_is_captured(asgi_app):
         )
 
     # Patch at the posthog module level where middleware imports from
-    with patch("hanzoanalytics.capture_exception", side_effect=mock_capture):
+    with patch("hanzo_insights.capture_exception", side_effect=mock_capture):
         async with AsyncClient(
             transport=ASGITransport(app=asgi_app), base_url="http://testserver"
         ) as ac:

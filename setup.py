@@ -7,18 +7,18 @@ except ImportError:
     from distutils.core import setup
 
 # Don't import module here, since deps may not be installed
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "hanzoanalytics"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "hanzo_insights"))
 from version import VERSION  # noqa: E402
 
 long_description = """
 Hanzo Insights is developer-friendly, self-hosted product analytics.
-hanzoanalytics is the python package.
+hanzo_insights is the python package.
 
 This package requires Python 3.10 or higher.
 """
 
 setup(
-    name="hanzoanalytics",
+    name="hanzo_insights",
     version=VERSION,
     url="https://github.com/hanzoai/insights",
     author="Hanzo AI",

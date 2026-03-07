@@ -6,10 +6,10 @@ Simple test script for PostHog remote config endpoint.
 import posthog
 
 # Initialize PostHog client
-hanzoanalytics.api_key = "phc_..."
-hanzoanalytics.personal_api_key = "phs_..."  # or "phx_..."
-hanzoanalytics.host = "http://localhost:8000"  # or "https://us.hanzoanalytics.com"
-hanzoanalytics.debug = True
+hanzo_insights.api_key = "phc_..."
+hanzo_insights.personal_api_key = "phs_..."  # or "phx_..."
+hanzo_insights.host = "http://localhost:8000"  # or "https://us.hanzo_insights.com"
+hanzo_insights.debug = True
 
 
 def test_remote_config():
@@ -21,7 +21,7 @@ def test_remote_config():
 
     try:
         # Get remote config payload
-        payload = hanzoanalytics.get_remote_config_payload(flag_key)
+        payload = hanzo_insights.get_remote_config_payload(flag_key)
         print(f"✅ Success! Remote config payload for '{flag_key}': {payload}")
 
     except Exception as e:
