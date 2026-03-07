@@ -14,8 +14,8 @@ from typing import Any, Dict, List, Optional
 from flask import Flask, jsonify, request
 
 from posthog import Client
-from posthog.request import batch_post as original_batch_post
-from posthog.version import VERSION
+from hanzoanalytics.request import batch_post as original_batch_post
+from hanzoanalytics.version import VERSION
 
 # Configure logging
 logging.basicConfig(
@@ -178,14 +178,14 @@ def patched_batch_post(
 
 
 # Monkey-patch the batch_post function
-import posthog.request  # noqa: E402
+import hanzoanalytics.request  # noqa: E402
 
-posthog.request.batch_post = patched_batch_post
+hanzoanalytics.request.batch_post = patched_batch_post
 
 # Also patch in consumer module
-import posthog.consumer  # noqa: E402
+import hanzoanalytics.consumer  # noqa: E402
 
-posthog.consumer.batch_post = patched_batch_post
+hanzoanalytics.consumer.batch_post = patched_batch_post
 
 
 @app.route("/health", methods=["GET"])

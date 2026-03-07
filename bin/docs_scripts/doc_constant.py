@@ -3,7 +3,7 @@ Constants for PostHog Python SDK documentation generation.
 """
 
 from typing import Dict, Union
-from posthog.version import VERSION
+from hanzoanalytics.version import VERSION
 
 # Documentation generation metadata
 DOCUMENTATION_METADATA = {
