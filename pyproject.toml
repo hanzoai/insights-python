@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hanzoanalytics"
+name = "hanzo-insights"
 version = "7.9.7"
 description = "Integrate Hanzo Insights into any python application."
 authors = [{ name = "Hanzo AI", email = "hey@hanzo.ai" }]
@@ -80,21 +80,21 @@ test = [
 
 [tool.setuptools]
 packages = [
-    "hanzoanalytics",
-    "hanzoanalytics.ai",
-    "hanzoanalytics.ai.langchain",
-    "hanzoanalytics.ai.openai",
-    "hanzoanalytics.ai.openai_agents",
-    "hanzoanalytics.ai.anthropic",
-    "hanzoanalytics.ai.gemini",
-    "hanzoanalytics.test",
-    "hanzoanalytics.test.ai",
-    "hanzoanalytics.test.ai.openai_agents",
-    "hanzoanalytics.integrations",
+    "hanzo_insights",
+    "hanzo_insights.ai",
+    "hanzo_insights.ai.langchain",
+    "hanzo_insights.ai.openai",
+    "hanzo_insights.ai.openai_agents",
+    "hanzo_insights.ai.anthropic",
+    "hanzo_insights.ai.gemini",
+    "hanzo_insights.test",
+    "hanzo_insights.test.ai",
+    "hanzo_insights.test.ai.openai_agents",
+    "hanzo_insights.integrations",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-testpaths = ["hanzoanalytics/test"]
+testpaths = ["hanzo_insights/test"]
 norecursedirs = ["integration_tests"]

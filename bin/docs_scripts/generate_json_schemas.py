@@ -339,10 +339,10 @@ def generate_sdk_documentation():
 
     # Import PostHog components
     import posthog
-    from hanzoanalytics.client import Client
-    import hanzoanalytics.types as types_module
-    import hanzoanalytics.args as args_module
-    from hanzoanalytics.version import VERSION
+    from hanzo_insights.client import Client
+    import hanzo_insights.types as types_module
+    import hanzo_insights.args as args_module
+    from hanzo_insights.version import VERSION
 
     # Main SDK info
     sdk_info = {
@@ -357,7 +357,7 @@ def generate_sdk_documentation():
     # Collect types
     types_list = []
 
-    # Types from hanzoanalytics.types
+    # Types from hanzo_insights.types
     for name in dir(types_module):
         obj = getattr(types_module, name)
         if inspect.isclass(obj) and not name.startswith("_"):
@@ -367,7 +367,7 @@ def generate_sdk_documentation():
             except Exception as e:
                 print(f"Error analyzing type {name}: {e}")
 
-    # Types from hanzoanalytics.args
+    # Types from hanzo_insights.args
     for name in dir(args_module):
         obj = getattr(args_module, name)
         if inspect.isclass(obj) and not name.startswith("_"):
@@ -394,7 +394,7 @@ def generate_sdk_documentation():
     client_class["title"] = "PostHog"
     classes_list.append(client_class)
 
-    # Global module functions (functions callable as hanzoanalytics.function_name)
+    # Global module functions (functions callable as hanzo_insights.function_name)
     global_functions = []
     for func_name in dir(posthog):
         # Skip private functions and non-callables
@@ -407,7 +407,7 @@ def generate_sdk_documentation():
         if (
             func_name not in ["Client", "Posthog"]
             and hasattr(func, "__module__")
-            and func.__module__ == "hanzoanalytics"
+            and func.__module__ == "hanzo_insights"
         ):
             try:
                 func_info = analyze_function(func, func_name)
