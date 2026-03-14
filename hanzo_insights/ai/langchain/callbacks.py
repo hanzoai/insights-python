@@ -41,7 +41,7 @@ from langchain_core.messages import (
 from langchain_core.outputs import ChatGeneration, LLMResult
 from pydantic import BaseModel
 
-from posthog import setup
+from hanzo_insights import setup
 from hanzo_insights.ai.sanitization import sanitize_langchain
 from hanzo_insights.ai.utils import get_model_params, with_privacy_mode
 from hanzo_insights.client import Client
@@ -80,7 +80,7 @@ class GenerationMetadata(SpanMetadata):
     tools: Optional[List[Dict[str, Any]]] = None
     """Tools provided to the model."""
     posthog_properties: Optional[Dict[str, Any]] = None
-    """PostHog properties of the run."""
+    """Insights properties of the run."""
 
 
 RunMetadata = Union[SpanMetadata, GenerationMetadata]
@@ -89,11 +89,11 @@ RunMetadataStorage = Dict[UUID, RunMetadata]
 
 class CallbackHandler(BaseCallbackHandler):
     """
-    The PostHog LLM observability callback handler for LangChain.
+    The Insights LLM observability callback handler for LangChain.
     """
 
     _ph_client: Client
-    """PostHog client instance."""
+    """Insights client instance."""
 
     _distinct_id: Optional[Union[str, int, UUID]]
     """Distinct ID of the user to associate the trace with."""
@@ -131,12 +131,12 @@ class CallbackHandler(BaseCallbackHandler):
     ):
         """
         Args:
-            client: PostHog client instance.
+            client: Insights client instance.
             distinct_id: Optional distinct ID of the user to associate the trace with.
             trace_id: Optional trace ID to use for the event.
             properties: Optional additional metadata to use for the trace.
             privacy_mode: Whether to redact the input and output of the trace.
-            groups: Optional additional PostHog groups to use for the trace.
+            groups: Optional additional Insights groups to use for the trace.
         """
         self._ph_client = client or setup()
         self._distinct_id = distinct_id

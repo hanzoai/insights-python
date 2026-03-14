@@ -2,7 +2,7 @@
 Anthropic-specific conversion utilities.
 
 This module handles the conversion of Anthropic API responses and inputs
-into standardized formats for PostHog tracking.
+into standardized formats for Insights tracking.
 """
 
 import json
@@ -425,7 +425,7 @@ def format_anthropic_streaming_input(kwargs: Dict[str, Any]) -> Any:
         kwargs: Keyword arguments passed to Anthropic API
 
     Returns:
-        Formatted input ready for PostHog tracking
+        Formatted input ready for Insights tracking
     """
     from hanzo_insights.ai.utils import merge_system_prompt
 
@@ -445,7 +445,7 @@ def format_anthropic_streaming_output_complete(
         accumulated_content: Raw accumulated text content as fallback
 
     Returns:
-        Formatted messages ready for PostHog tracking
+        Formatted messages ready for Insights tracking
     """
     formatted_content = format_anthropic_streaming_content(content_blocks)
 

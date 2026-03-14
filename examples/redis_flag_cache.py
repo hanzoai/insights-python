@@ -1,17 +1,17 @@
 """
-Redis-based distributed cache for PostHog feature flag definitions.
+Redis-based distributed cache for Insights feature flag definitions.
 
 This example demonstrates how to implement a FlagDefinitionCacheProvider
 using Redis for multi-instance deployments (leader election pattern).
 
 Usage:
     import redis
-    from posthog import Posthog
+    from hanzo_insights import Posthog
 
     redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
     cache = RedisFlagCache(redis_client, service_key="my-service")
 
-    posthog = Posthog(
+    client = Insights(
         "<project_api_key>",
         personal_api_key="<personal_api_key>",
         flag_definition_cache_provider=cache,
@@ -24,17 +24,17 @@ Requirements:
 import json
 import uuid
 
-from posthog import FlagDefinitionCacheData, FlagDefinitionCacheProvider
+from hanzo_insights import FlagDefinitionCacheData, FlagDefinitionCacheProvider
 from redis import Redis
 from typing import Optional
 
 
 class RedisFlagCache(FlagDefinitionCacheProvider):
     """
-    A distributed cache for PostHog feature flag definitions using Redis.
+    A distributed cache for Insights feature flag definitions using Redis.
 
     In a multi-instance deployment (e.g., multiple serverless functions or containers),
-    we want only ONE instance to poll PostHog for flag updates, while all instances
+    we want only ONE instance to poll Insights for flag updates, while all instances
     share the cached results. This prevents N instances from making N redundant API calls.
 
     The implementation uses leader election:
@@ -113,7 +113,7 @@ class RedisFlagCache(FlagDefinitionCacheProvider):
 
     def should_fetch_flag_definitions(self) -> bool:
         """
-        Determines if this instance should fetch flag definitions from PostHog.
+        Determines if this instance should fetch flag definitions from Insights.
 
         Atomically either:
         - Acquires the lock if no one holds it, OR

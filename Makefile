@@ -9,37 +9,38 @@ build_release:
 	rm -rf dist/*
 	python setup.py sdist bdist_wheel
 
-# Builds the `posthoganalytics` PyPI package, which is a mirror of `posthog`
-# published under a different name for internal use by posthog/posthog.
+# Builds the `posthoganalytics` PyPI package, which is a mirror of `hanzo_insights`
+# published under a different name for backward compatibility with the upstream
+# posthog/posthog project.
 #
 # The process works in three phases:
-#   1. posthog -> posthoganalytics: Copy the source, rewrite all imports,
-#      remove the original posthog/ dir, and build the dist.
-#   2. posthoganalytics -> posthog: Reverse the import rewrites, copy
-#      everything back into posthog/, and clean up.
+#   1. hanzo_insights -> posthoganalytics: Copy the source, rewrite all imports,
+#      remove the original hanzo_insights/ dir, and build the dist.
+#   2. posthoganalytics -> hanzo_insights: Reverse the import rewrites, copy
+#      everything back into hanzo_insights/, and clean up.
 #   3. Restore pyproject.toml from backup (setup_analytics.py modifies it).
 #
 # This ensures the working tree is left in the same state it started in.
 #
 # NOTE: This target clears dist/ before building. In the release workflow,
-# `build_release` (posthog) must be published BEFORE running this target,
-# otherwise the posthog dist artifacts will be lost.
+# `build_release` (hanzo_insights) must be published BEFORE running this target,
+# otherwise the hanzo_insights dist artifacts will be lost.
 build_release_analytics:
 	rm -rf dist
 	rm -rf build
 	rm -rf posthoganalytics
 	mkdir posthoganalytics
-	cp -r posthog/* posthoganalytics/
-	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthog /from posthoganalytics /g' {} \;
-	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthog\./from posthoganalytics\./g' {} \;
+	cp -r hanzo_insights/* posthoganalytics/
+	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from hanzo_insights /from posthoganalytics /g' {} \;
+	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from hanzo_insights\./from posthoganalytics\./g' {} \;
 	find ./posthoganalytics -name "*.bak" -delete
-	rm -rf posthog
+	rm -rf hanzo_insights
 	python setup_analytics.py sdist bdist_wheel
-	mkdir posthog
-	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthoganalytics /from posthog /g' {} \;
-	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthoganalytics\./from posthog\./g' {} \;
+	mkdir hanzo_insights
+	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthoganalytics /from hanzo_insights /g' {} \;
+	find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthoganalytics\./from hanzo_insights\./g' {} \;
 	find ./posthoganalytics -name "*.bak" -delete
-	cp -r posthoganalytics/* posthog/
+	cp -r posthoganalytics/* hanzo_insights/
 	rm -rf posthoganalytics
 	rm -f pyproject.toml
 	cp pyproject.toml.backup pyproject.toml
@@ -54,14 +55,14 @@ prep_local:
 	cp -r . ../posthog-python-local/
 	cd ../posthog-python-local && rm -rf dist build posthoganalytics .git
 	cd ../posthog-python-local && mkdir posthoganalytics
-	cd ../posthog-python-local && cp -r posthog/* posthoganalytics/
-	cd ../posthog-python-local && find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthog /from posthoganalytics /g' {} \;
-	cd ../posthog-python-local && find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from posthog\./from posthoganalytics\./g' {} \;
+	cd ../posthog-python-local && cp -r hanzo_insights/* posthoganalytics/
+	cd ../posthog-python-local && find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from hanzo_insights /from posthoganalytics /g' {} \;
+	cd ../posthog-python-local && find ./posthoganalytics -type f -name "*.py" -exec sed -i.bak -e 's/from hanzo_insights\./from posthoganalytics\./g' {} \;
 	cd ../posthog-python-local && find ./posthoganalytics -name "*.bak" -delete
-	cd ../posthog-python-local && rm -rf posthog
+	cd ../posthog-python-local && rm -rf hanzo_insights
 	cd ../posthog-python-local && sed -i.bak 's/from version import VERSION/from posthoganalytics.version import VERSION/' setup_analytics.py
 	cd ../posthog-python-local && rm setup_analytics.py.bak
-	cd ../posthog-python-local && sed -i.bak 's/"posthog"/"posthoganalytics"/' setup.py
+	cd ../posthog-python-local && sed -i.bak 's/"hanzo_insights"/"posthoganalytics"/' setup.py
 	cd ../posthog-python-local && rm setup.py.bak
 	cd ../posthog-python-local && python -c "import setup_analytics" 2>/dev/null || true
 	@echo "Local copy created at ../posthog-python-local"

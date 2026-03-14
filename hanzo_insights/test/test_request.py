@@ -72,12 +72,12 @@ class TestRequests(unittest.TestCase):
 
     def test_invalid_request_error(self):
         self.assertRaises(
-            Exception, batch_post, "testsecret", "https://t.hanzo_insights.com", False, "[{]"
+            Exception, batch_post, "testsecret", "https://t.posthog.com", False, "[{]"
         )
 
     def test_invalid_host(self):
         self.assertRaises(
-            Exception, batch_post, "testsecret", "t.hanzo_insights.com/", batch=[]
+            Exception, batch_post, "testsecret", "t.posthog.com/", batch=[]
         )
 
     def test_datetime_serialization(self):
@@ -286,7 +286,7 @@ class TestGet(unittest.TestCase):
         call_kwargs = mock_get.call_args[1]
         self.assertIn("User-Agent", call_kwargs["headers"])
         self.assertTrue(
-            call_kwargs["headers"]["User-Agent"].startswith("posthog-python/")
+            call_kwargs["headers"]["User-Agent"].startswith("hanzo-insights-python/")
         )
 
     @mock.patch("hanzo_insights.request._session.get")
@@ -332,20 +332,20 @@ class TestGet(unittest.TestCase):
 @pytest.mark.parametrize(
     "host, expected",
     [
-        ("https://t.hanzo_insights.com", "https://t.hanzo_insights.com"),
-        ("https://t.hanzo_insights.com/", "https://t.hanzo_insights.com/"),
-        ("t.hanzo_insights.com", "t.hanzo_insights.com"),
-        ("t.hanzo_insights.com/", "t.hanzo_insights.com/"),
-        ("https://us.hanzo_insights.com.rg.proxy.com", "https://us.hanzo_insights.com.rg.proxy.com"),
-        ("app.hanzo_insights.com", "app.hanzo_insights.com"),
-        ("eu.hanzo_insights.com", "eu.hanzo_insights.com"),
-        ("https://app.hanzo_insights.com", "https://us.i.hanzo_insights.com"),
-        ("https://eu.hanzo_insights.com", "https://eu.i.hanzo_insights.com"),
-        ("https://us.hanzo_insights.com", "https://us.i.hanzo_insights.com"),
-        ("https://app.hanzo_insights.com/", "https://us.i.hanzo_insights.com"),
-        ("https://eu.hanzo_insights.com/", "https://eu.i.hanzo_insights.com"),
-        ("https://us.hanzo_insights.com/", "https://us.i.hanzo_insights.com"),
-        (None, "https://us.i.hanzo_insights.com"),
+        ("https://t.posthog.com", "https://t.posthog.com"),
+        ("https://t.posthog.com/", "https://t.posthog.com/"),
+        ("t.posthog.com", "t.posthog.com"),
+        ("t.posthog.com/", "t.posthog.com/"),
+        ("https://us.posthog.com.rg.proxy.com", "https://us.posthog.com.rg.proxy.com"),
+        ("app.posthog.com", "app.posthog.com"),
+        ("eu.posthog.com", "eu.posthog.com"),
+        ("https://app.posthog.com", "https://us.i.posthog.com"),
+        ("https://eu.posthog.com", "https://eu.i.posthog.com"),
+        ("https://us.posthog.com", "https://us.i.posthog.com"),
+        ("https://app.posthog.com/", "https://us.i.posthog.com"),
+        ("https://eu.posthog.com/", "https://eu.i.posthog.com"),
+        ("https://us.posthog.com/", "https://us.i.posthog.com"),
+        (None, "https://us.i.posthog.com"),
     ],
 )
 def test_routing_to_custom_host(host, expected):
@@ -428,7 +428,7 @@ class TestFlagsSession(unittest.TestCase):
         mock_session.post.return_value = mock_response
         mock_get_flags_session.return_value = mock_session
 
-        result = flags("test-key", "https://test.hanzo_insights.com", distinct_id="user123")
+        result = flags("test-key", "https://test.posthog.com", distinct_id="user123")
 
         self.assertEqual(result["featureFlags"]["test-flag"], True)
         mock_get_flags_session.assert_called_once()
@@ -453,7 +453,7 @@ class TestFlagsSession(unittest.TestCase):
         mock_get_flags_session.return_value = mock_session
 
         with self.assertRaises(QuotaLimitError):
-            flags("test-key", "https://test.hanzo_insights.com", distinct_id="user123")
+            flags("test-key", "https://test.posthog.com", distinct_id="user123")
 
         # QuotaLimitError is raised after response is received, not retried
         self.assertEqual(mock_session.post.call_count, 1)
@@ -475,7 +475,7 @@ class TestFlagsSessionNetworkRetries(unittest.TestCase):
         session = _build_flags_session()
 
         # Get the adapter for https://
-        adapter = session.get_adapter("https://test.hanzo_insights.com")
+        adapter = session.get_adapter("https://test.posthog.com")
 
         # Verify retry configuration
         retry = adapter.max_retries
@@ -494,7 +494,7 @@ class TestFlagsSessionNetworkRetries(unittest.TestCase):
         from hanzo_insights.request import _build_flags_session, RETRY_STATUS_FORCELIST
 
         session = _build_flags_session()
-        adapter = session.get_adapter("https://test.hanzo_insights.com")
+        adapter = session.get_adapter("https://test.posthog.com")
         retry = adapter.max_retries
 
         # Verify the status codes that trigger retries
@@ -521,7 +521,7 @@ class TestFlagsSessionNetworkRetries(unittest.TestCase):
         from hanzo_insights.request import _build_flags_session
 
         session = _build_flags_session()
-        adapter = session.get_adapter("https://test.hanzo_insights.com")
+        adapter = session.get_adapter("https://test.posthog.com")
         retry = adapter.max_retries
 
         self.assertEqual(

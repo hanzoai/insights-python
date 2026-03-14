@@ -9,11 +9,11 @@ functions) to share flag definitions and reduce API calls.
 
 Usage:
 
-    from posthog import Posthog
+    from hanzo_insights import Insights
     from hanzo_insights.flag_definition_cache import FlagDefinitionCacheProvider
 
     cache = RedisFlagDefinitionCache(redis_client, "my-team")
-    posthog = Posthog(
+    client = Insights(
         "<project_api_key>",
         personal_api_key="<personal_api_key>",
         flag_definition_cache_provider=cache,
@@ -63,7 +63,7 @@ class FlagDefinitionCacheProvider(Protocol):
        new definitions from the API. Store the data in your external cache
        and release any locks.
 
-    4. `shutdown()` - Called when the PostHog client shuts down. Release any
+    4. `shutdown()` - Called when the Insights client shuts down. Release any
        distributed locks and clean up resources.
 
     Error Handling:
@@ -104,7 +104,7 @@ class FlagDefinitionCacheProvider(Protocol):
 
     def on_flag_definitions_received(self, data: FlagDefinitionCacheData) -> None:
         """
-        Called after successfully receiving new flag definitions from PostHog.
+        Called after successfully receiving new flag definitions from Insights.
 
         Use this to store the data in your external cache and release any
         distributed locks acquired in `should_fetch_flag_definitions()`.
@@ -117,7 +117,7 @@ class FlagDefinitionCacheProvider(Protocol):
 
     def shutdown(self) -> None:
         """
-        Called when the PostHog client shuts down.
+        Called when the Insights client shuts down.
 
         Use this to release any distributed locks and clean up resources.
         This method is called even if `should_fetch_flag_definitions()`

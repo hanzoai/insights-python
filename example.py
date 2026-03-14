@@ -1,18 +1,18 @@
-# PostHog Python library example
+# Hanzo Insights Python library example
 #
-# This script demonstrates various PostHog Python SDK capabilities including:
+# This script demonstrates various Hanzo Insights Python SDK capabilities including:
 # - Basic event capture and user identification
 # - Feature flag local evaluation
 # - Feature flag payloads
 # - Context management and tagging
 #
 # Setup:
-# 1. Copy .env.example to .env and fill in your PostHog credentials
+# 1. Copy .env.example to .env and fill in your Insights credentials
 # 2. Run this script and choose from the interactive menu
 
 import os
 
-import posthog
+import hanzo_insights
 
 
 def load_env_file():
@@ -31,18 +31,18 @@ def load_env_file():
 load_env_file()
 
 # Get configuration
-project_key = os.getenv("POSTHOG_PROJECT_API_KEY", "")
-personal_api_key = os.getenv("POSTHOG_PERSONAL_API_KEY", "")
-host = os.getenv("POSTHOG_HOST", "http://localhost:8000")
+project_key = os.getenv("INSIGHTS_PROJECT_API_KEY", "")
+personal_api_key = os.getenv("INSIGHTS_PERSONAL_API_KEY", "")
+host = os.getenv("INSIGHTS_HOST", "http://localhost:8000")
 
 # Check if project key is provided (required)
 if not project_key:
-    print("❌ Missing PostHog project API key!")
-    print("   Please set POSTHOG_PROJECT_API_KEY environment variable")
+    print("❌ Missing Insights project API key!")
+    print("   Please set INSIGHTS_PROJECT_API_KEY environment variable")
     print("   or copy .env.example to .env and fill in your values")
     exit(1)
 
-# Configure PostHog with credentials
+# Configure Insights with credentials
 hanzo_insights.debug = False
 hanzo_insights.api_key = project_key
 hanzo_insights.project_api_key = project_key
@@ -54,7 +54,7 @@ local_eval_available = bool(personal_api_key)
 if personal_api_key:
     hanzo_insights.personal_api_key = personal_api_key
 
-print("🔑 PostHog Configuration:")
+print("🔑 Insights Configuration:")
 print(f"   Project API Key: {project_key[:9]}...")
 if local_eval_available:
     print("   Personal API Key: [SET]")
@@ -63,7 +63,7 @@ else:
 print(f"   Host: {host}\n")
 
 # Display menu and get user choice
-print("🚀 PostHog Python SDK Demo - Choose an example to run:\n")
+print("🚀 Hanzo Insights Python SDK Demo - Choose an example to run:\n")
 print("1. Identify and capture examples")
 local_eval_note = "" if local_eval_available else " [requires personal API key]"
 print(f"2. Feature flag local evaluation examples{local_eval_note}")
@@ -137,7 +137,7 @@ elif choice == "2":
     if not local_eval_available:
         print("\n❌ This example requires a personal API key for local evaluation.")
         print(
-            "   Set POSTHOG_PERSONAL_API_KEY environment variable to run this example."
+            "   Set INSIGHTS_PERSONAL_API_KEY environment variable to run this example."
         )
         hanzo_insights.shutdown()
         exit(1)
@@ -212,7 +212,7 @@ elif choice == "4":
     if not local_eval_available:
         print("\n❌ This example requires a personal API key for local evaluation.")
         print(
-            "   Set POSTHOG_PERSONAL_API_KEY environment variable to run this example."
+            "   Set INSIGHTS_PERSONAL_API_KEY environment variable to run this example."
         )
         hanzo_insights.shutdown()
         exit(1)
