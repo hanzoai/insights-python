@@ -2544,7 +2544,7 @@ class TestLocalEvaluation(unittest.TestCase):
             client.load_feature_flags()
             self.assertEqual(
                 logs.output[0],
-                "ERROR:posthog:[FEATURE FLAGS] Error loading feature flags: To use feature flags, please set a valid personal_api_key. More information: https://hanzo_insights.com/docs/api/overview",
+                "ERROR:hanzo_insights:[FEATURE FLAGS] Error loading feature flags: To use feature flags, please set a valid personal_api_key. More information: https://insights.hanzo.ai/docs/api/overview",
             )
         client.debug = True
         self.assertRaises(APIError, client.load_feature_flags)
@@ -2775,7 +2775,7 @@ class TestLocalEvaluation(unittest.TestCase):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "test@hanzo_insights.com",
+                                    "value": "test@posthog.com",
                                     "operator": "exact",
                                 }
                             ],
@@ -2810,7 +2810,7 @@ class TestLocalEvaluation(unittest.TestCase):
             client.get_feature_flag(
                 "beta-feature",
                 "test_id",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             "second-variant",
         )
@@ -2838,7 +2838,7 @@ class TestLocalEvaluation(unittest.TestCase):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "test@hanzo_insights.com",
+                                    "value": "test@posthog.com",
                                     "operator": "exact",
                                 }
                             ],
@@ -2851,7 +2851,7 @@ class TestLocalEvaluation(unittest.TestCase):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "test@hanzo_insights.com",
+                                    "value": "test@posthog.com",
                                     "operator": "exact",
                                 }
                             ],
@@ -2886,7 +2886,7 @@ class TestLocalEvaluation(unittest.TestCase):
             client.get_feature_flag(
                 "beta-feature",
                 "test_id",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             "second-variant",
         )
@@ -2894,7 +2894,7 @@ class TestLocalEvaluation(unittest.TestCase):
             client.get_feature_flag(
                 "beta-feature",
                 "example_id",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             "second-variant",
         )
@@ -2919,7 +2919,7 @@ class TestLocalEvaluation(unittest.TestCase):
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": "test@hanzo_insights.com",
+                                    "value": "test@posthog.com",
                                     "operator": "exact",
                                 }
                             ],
@@ -2954,7 +2954,7 @@ class TestLocalEvaluation(unittest.TestCase):
             client.get_feature_flag(
                 "beta-feature",
                 "test_id",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             "third-variant",
         )
@@ -3109,7 +3109,7 @@ class TestLocalEvaluation(unittest.TestCase):
                             {
                                 "key": "email",
                                 "type": "person",
-                                "value": "test@hanzo_insights.com",
+                                "value": "test@posthog.com",
                                 "operator": "exact",
                             }
                         ],
@@ -3149,7 +3149,7 @@ class TestLocalEvaluation(unittest.TestCase):
             self.client.get_feature_flag_payload(
                 "beta-feature",
                 "test_id",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             {"a": "json"},
         )
@@ -3158,7 +3158,7 @@ class TestLocalEvaluation(unittest.TestCase):
                 "beta-feature",
                 "test_id",
                 match_value="third-variant",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             {"a": "json"},
         )
@@ -3169,7 +3169,7 @@ class TestLocalEvaluation(unittest.TestCase):
                 "beta-feature",
                 "test_id",
                 match_value="first-variant",
-                person_properties={"email": "test@hanzo_insights.com"},
+                person_properties={"email": "test@posthog.com"},
             ),
             "some-payload",
         )

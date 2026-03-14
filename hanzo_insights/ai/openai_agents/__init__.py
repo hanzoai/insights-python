@@ -14,9 +14,9 @@ except ImportError:
         "Please install the OpenAI Agents SDK to use this feature: 'pip install openai-agents'"
     )
 
-from hanzo_insights.ai.openai_agents.processor import PostHogTracingProcessor
+from hanzo_insights.ai.openai_agents.processor import InsightsTracingProcessor, PostHogTracingProcessor
 
-__all__ = ["PostHogTracingProcessor", "instrument"]
+__all__ = ["InsightsTracingProcessor", "PostHogTracingProcessor", "instrument"]
 
 
 def instrument(
@@ -25,23 +25,23 @@ def instrument(
     privacy_mode: bool = False,
     groups: Optional[Dict[str, Any]] = None,
     properties: Optional[Dict[str, Any]] = None,
-) -> PostHogTracingProcessor:
+) -> InsightsTracingProcessor:
     """
-    One-liner to instrument OpenAI Agents SDK with PostHog tracing.
+    One-liner to instrument OpenAI Agents SDK with Hanzo Insights tracing.
 
-    This registers a PostHogTracingProcessor with the OpenAI Agents SDK,
+    This registers an InsightsTracingProcessor with the OpenAI Agents SDK,
     automatically capturing traces, spans, and LLM generations.
 
     Args:
-        client: Optional PostHog client instance. If not provided, uses the default client.
+        client: Optional Insights client instance. If not provided, uses the default client.
         distinct_id: Optional distinct ID to associate with all traces.
             Can also be a callable that takes a trace and returns a distinct ID.
         privacy_mode: If True, redacts input/output content from events.
-        groups: Optional PostHog groups to associate with events.
+        groups: Optional Insights groups to associate with events.
         properties: Optional additional properties to include with all events.
 
     Returns:
-        PostHogTracingProcessor: The registered processor instance.
+        InsightsTracingProcessor: The registered processor instance.
 
     Example:
         ```python
@@ -57,7 +57,7 @@ def instrument(
             properties={"environment": "production"}
         )
 
-        # Now run agents as normal - traces automatically sent to PostHog
+        # Now run agents as normal - traces automatically sent to Insights
         from agents import Agent, Runner
         agent = Agent(name="Assistant", instructions="You are helpful.")
         result = Runner.run_sync(agent, "Hello!")
@@ -65,7 +65,7 @@ def instrument(
     """
     from agents.tracing import add_trace_processor
 
-    processor = PostHogTracingProcessor(
+    processor = InsightsTracingProcessor(
         client=client,
         distinct_id=distinct_id,
         privacy_mode=privacy_mode,

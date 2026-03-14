@@ -13,7 +13,7 @@ except ImportError:
         "Please install the Google Gemini SDK to use this feature: 'pip install google-genai'"
     )
 
-from posthog import setup
+from hanzo_insights import setup
 from hanzo_insights.ai.utils import (
     call_llm_and_track_usage_async,
     capture_streaming_event,
@@ -25,12 +25,12 @@ from hanzo_insights.ai.gemini.gemini_converter import (
     format_gemini_streaming_output,
 )
 from hanzo_insights.ai.sanitization import sanitize_gemini
-from hanzo_insights.client import Client as PostHogClient
+from hanzo_insights.client import Client as InsightsClient
 
 
 class AsyncClient:
     """
-    An async drop-in replacement for genai.Client that automatically sends LLM usage events to PostHog.
+    An async drop-in replacement for genai.Client that automatically sends LLM usage events to Insights.
 
     Usage:
         client = AsyncClient(
@@ -46,7 +46,7 @@ class AsyncClient:
         )
     """
 
-    _ph_client: PostHogClient
+    _ph_client: InsightsClient
 
     def __init__(
         self,
@@ -57,7 +57,7 @@ class AsyncClient:
         location: Optional[str] = None,
         debug_config: Optional[Any] = None,
         http_options: Optional[Any] = None,
-        posthog_client: Optional[PostHogClient] = None,
+        posthog_client: Optional[InsightsClient] = None,
         posthog_distinct_id: Optional[str] = None,
         posthog_properties: Optional[Dict[str, Any]] = None,
         posthog_privacy_mode: bool = False,
@@ -73,7 +73,7 @@ class AsyncClient:
             location: GCP location for Vertex AI
             debug_config: Debug configuration for the client
             http_options: HTTP options for the client
-            posthog_client: PostHog client for tracking usage
+            posthog_client: Insights client for tracking usage
             posthog_distinct_id: Default distinct ID for all calls (can be overridden per call)
             posthog_properties: Default properties for all calls (can be overridden per call)
             posthog_privacy_mode: Default privacy mode for all calls (can be overridden per call)
@@ -84,7 +84,7 @@ class AsyncClient:
         self._ph_client = posthog_client or setup()
 
         if self._ph_client is None:
-            raise ValueError("posthog_client is required for PostHog tracking")
+            raise ValueError("posthog_client is required for Insights tracking")
 
         self.models = AsyncModels(
             api_key=api_key,
@@ -105,10 +105,10 @@ class AsyncClient:
 
 class AsyncModels:
     """
-    Async Models interface that mimics genai.Client().aio.models with PostHog tracking.
+    Async Models interface that mimics genai.Client().aio.models with Insights tracking.
     """
 
-    _ph_client: PostHogClient  # Not None after __init__ validation
+    _ph_client: InsightsClient  # Not None after __init__ validation
 
     def __init__(
         self,
@@ -119,7 +119,7 @@ class AsyncModels:
         location: Optional[str] = None,
         debug_config: Optional[Any] = None,
         http_options: Optional[Any] = None,
-        posthog_client: Optional[PostHogClient] = None,
+        posthog_client: Optional[InsightsClient] = None,
         posthog_distinct_id: Optional[str] = None,
         posthog_properties: Optional[Dict[str, Any]] = None,
         posthog_privacy_mode: bool = False,
@@ -135,7 +135,7 @@ class AsyncModels:
             location: GCP location for Vertex AI
             debug_config: Debug configuration for the client
             http_options: HTTP options for the client
-            posthog_client: PostHog client for tracking usage
+            posthog_client: Insights client for tracking usage
             posthog_distinct_id: Default distinct ID for all calls
             posthog_properties: Default properties for all calls
             posthog_privacy_mode: Default privacy mode for all calls
@@ -146,9 +146,9 @@ class AsyncModels:
         self._ph_client = posthog_client or setup()
 
         if self._ph_client is None:
-            raise ValueError("posthog_client is required for PostHog tracking")
+            raise ValueError("posthog_client is required for Insights tracking")
 
-        # Store default PostHog settings
+        # Store default Insights settings
         self._default_distinct_id = posthog_distinct_id
         self._default_properties = posthog_properties or {}
         self._default_privacy_mode = posthog_privacy_mode
@@ -204,7 +204,7 @@ class AsyncModels:
         call_privacy_mode: Optional[bool],
         call_groups: Optional[Dict[str, Any]],
     ):
-        """Merge call-level PostHog parameters with client defaults."""
+        """Merge call-level Insights parameters with client defaults."""
 
         # Use call-level values if provided, otherwise fall back to defaults
         distinct_id = (
@@ -242,10 +242,10 @@ class AsyncModels:
         **kwargs: Any,
     ):
         """
-        Generate content using Gemini's API while tracking usage in PostHog.
+        Generate content using Gemini's API while tracking usage in Insights.
 
         This method signature exactly matches genai.Client().aio.models.generate_content()
-        with additional PostHog tracking parameters.
+        with additional Insights tracking parameters.
 
         Args:
             model: The model to use (e.g., 'gemini-2.0-flash')
@@ -258,7 +258,7 @@ class AsyncModels:
             **kwargs: Arguments passed to Gemini's generate_content
         """
 
-        # Merge PostHog parameters
+        # Merge Insights parameters
         distinct_id, trace_id, properties, privacy_mode, groups = (
             self._merge_posthog_params(
                 posthog_distinct_id,
@@ -383,7 +383,7 @@ class AsyncModels:
         capture_streaming_event(self._ph_client, event_data)
 
     def _format_input(self, contents, **kwargs):
-        """Format input contents for PostHog tracking"""
+        """Format input contents for Insights tracking"""
 
         # Create kwargs dict with contents for merge_system_prompt
         input_kwargs = {"contents": contents, **kwargs}
@@ -400,7 +400,7 @@ class AsyncModels:
         posthog_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
-        # Merge PostHog parameters
+        # Merge Insights parameters
         distinct_id, trace_id, properties, privacy_mode, groups = (
             self._merge_posthog_params(
                 posthog_distinct_id,

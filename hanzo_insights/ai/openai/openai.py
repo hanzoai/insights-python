@@ -24,18 +24,18 @@ from hanzo_insights.ai.openai.openai_converter import (
     accumulate_openai_tool_calls,
 )
 from hanzo_insights.ai.sanitization import sanitize_openai, sanitize_openai_response
-from hanzo_insights.client import Client as PostHogClient
-from posthog import setup
+from hanzo_insights.client import Client as InsightsClient
+from hanzo_insights import setup
 
 
 class OpenAI(openai.OpenAI):
     """
-    A wrapper around the OpenAI SDK that automatically sends LLM usage events to PostHog.
+    A wrapper around the OpenAI SDK that automatically sends LLM usage events to Insights.
     """
 
-    _ph_client: PostHogClient
+    _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[PostHogClient] = None, **kwargs):
+    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: OpenAI API key.
@@ -67,7 +67,7 @@ class OpenAI(openai.OpenAI):
 
 
 class WrappedResponses:
-    """Wrapper for OpenAI responses that tracks usage in PostHog."""
+    """Wrapper for OpenAI responses that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_responses):
         self._client = client
@@ -232,7 +232,7 @@ class WrappedResponses:
         **kwargs: Any,
     ):
         """
-        Parse structured output using OpenAI's 'responses.parse' method, but also track usage in PostHog.
+        Parse structured output using OpenAI's 'responses.parse' method, but also track usage in Insights.
 
         Args:
             posthog_distinct_id: Optional ID to associate with the usage event.
@@ -260,7 +260,7 @@ class WrappedResponses:
 
 
 class WrappedChat:
-    """Wrapper for OpenAI chat that tracks usage in PostHog."""
+    """Wrapper for OpenAI chat that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_chat):
         self._client = client
@@ -276,7 +276,7 @@ class WrappedChat:
 
 
 class WrappedCompletions:
-    """Wrapper for OpenAI chat completions that tracks usage in PostHog."""
+    """Wrapper for OpenAI chat completions that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_completions):
         self._client = client
@@ -451,7 +451,7 @@ class WrappedCompletions:
 
 
 class WrappedEmbeddings:
-    """Wrapper for OpenAI embeddings that tracks usage in PostHog."""
+    """Wrapper for OpenAI embeddings that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_embeddings):
         self._client = client
@@ -471,7 +471,7 @@ class WrappedEmbeddings:
         **kwargs: Any,
     ):
         """
-        Create an embedding using OpenAI's 'embeddings.create' method, but also track usage in PostHog.
+        Create an embedding using OpenAI's 'embeddings.create' method, but also track usage in Insights.
 
         Args:
             posthog_distinct_id: Optional ID to associate with the usage event.
@@ -535,7 +535,7 @@ class WrappedEmbeddings:
 
 
 class WrappedBeta:
-    """Wrapper for OpenAI beta features that tracks usage in PostHog."""
+    """Wrapper for OpenAI beta features that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_beta):
         self._client = client
@@ -551,7 +551,7 @@ class WrappedBeta:
 
 
 class WrappedBetaChat:
-    """Wrapper for OpenAI beta chat that tracks usage in PostHog."""
+    """Wrapper for OpenAI beta chat that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_beta_chat):
         self._client = client
@@ -567,7 +567,7 @@ class WrappedBetaChat:
 
 
 class WrappedBetaCompletions:
-    """Wrapper for OpenAI beta chat completions that tracks usage in PostHog."""
+    """Wrapper for OpenAI beta chat completions that tracks usage in Insights."""
 
     def __init__(self, client: OpenAI, original_beta_completions):
         self._client = client

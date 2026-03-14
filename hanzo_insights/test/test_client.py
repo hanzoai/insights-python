@@ -175,7 +175,7 @@ class TestClient(unittest.TestCase):
             client = Client(
                 FAKE_TEST_API_KEY,
                 on_error=self.set_fail,
-                host="https://app.hanzo_insights.com",
+                host="https://app.posthog.com",
             )
             exception = Exception("test exception")
             client.capture_exception(exception, distinct_id="distinct_id")
@@ -230,7 +230,7 @@ class TestClient(unittest.TestCase):
                 capture_call[1]["properties"]["$exception_list"][0]["stacktrace"][
                     "frames"
                 ][0]["filename"],
-                "posthog/test/test_client.py",
+                "hanzo_insights/test/test_client.py",
             )
             self.assertEqual(
                 capture_call[1]["properties"]["$exception_list"][0]["stacktrace"][
@@ -260,7 +260,7 @@ class TestClient(unittest.TestCase):
                 self.assertFalse(patch_capture.called)
                 self.assertEqual(
                     logs.output[0],
-                    "WARNING:posthog:No exception information available",
+                    "WARNING:hanzo_insights:No exception information available",
                 )
 
     def test_capture_exception_logs_when_enabled(self):
@@ -270,7 +270,7 @@ class TestClient(unittest.TestCase):
                 Exception("test exception"), distinct_id="distinct_id"
             )
             self.assertEqual(
-                logs.output[0], "ERROR:posthog:test exception\nNoneType: None"
+                logs.output[0], "ERROR:hanzo_insights:test exception\nNoneType: None"
             )
 
     @mock.patch("hanzo_insights.client.flags")
@@ -327,7 +327,7 @@ class TestClient(unittest.TestCase):
                             {
                                 "key": "email",
                                 "type": "person",
-                                "value": "test@hanzo_insights.com",
+                                "value": "test@posthog.com",
                                 "operator": "exact",
                             }
                         ],
@@ -477,7 +477,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(client.feature_flags_by_key, {})
             self.assertEqual(client.group_type_mapping, {})
             self.assertEqual(client.cohorts, {})
-            self.assertIn("PostHog feature flags quota limited", logs.output[0])
+            self.assertIn("Insights feature flags quota limited", logs.output[0])
 
     @mock.patch("hanzo_insights.client.get")
     def test_load_feature_flags_unauthorized(self, patch_get):
@@ -510,7 +510,7 @@ class TestClient(unittest.TestCase):
                             {
                                 "key": "email",
                                 "type": "person",
-                                "value": "test@hanzo_insights.com",
+                                "value": "test@posthog.com",
                                 "operator": "exact",
                             }
                         ],
@@ -655,7 +655,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(patch_flags.call_count, 1)
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.hanzo_insights.com",
+                "https://us.i.posthog.com",
                 timeout=3,
                 distinct_id="distinct_id",
                 groups={},
@@ -680,7 +680,7 @@ class TestClient(unittest.TestCase):
         with mock.patch("hanzo_insights.client.batch_post") as mock_post:
             client = Client(
                 FAKE_TEST_API_KEY,
-                host="https://app.hanzo_insights.com",
+                host="https://app.posthog.com",
                 on_error=self.set_fail,
                 personal_api_key=FAKE_TEST_API_KEY,
                 disable_geoip=True,
@@ -720,7 +720,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(patch_flags.call_count, 1)
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.hanzo_insights.com",
+                "https://us.i.posthog.com",
                 timeout=12,
                 distinct_id="distinct_id",
                 groups={},
@@ -1168,7 +1168,7 @@ class TestClient(unittest.TestCase):
             msg_uuid = client.capture(
                 "test_event",
                 distinct_id="distinct_id",
-                groups={"company": "id:5", "instance": "app.hanzo_insights.com"},
+                groups={"company": "id:5", "instance": "app.posthog.com"},
             )
 
             self.assertIsNotNone(msg_uuid)
@@ -1180,7 +1180,7 @@ class TestClient(unittest.TestCase):
 
             self.assertEqual(
                 msg["properties"]["$groups"],
-                {"company": "id:5", "instance": "app.hanzo_insights.com"},
+                {"company": "id:5", "instance": "app.posthog.com"},
             )
 
     def test_basic_set(self):
@@ -1470,7 +1470,7 @@ class TestClient(unittest.TestCase):
                 "test_event",
                 distinct_id="distinct_id",
                 properties={"$session_id": session_id},
-                groups={"company": "id:5", "instance": "app.hanzo_insights.com"},
+                groups={"company": "id:5", "instance": "app.posthog.com"},
             )
 
             self.assertIsNotNone(msg_uuid)
@@ -1483,7 +1483,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(msg["properties"]["$session_id"], session_id)
             self.assertEqual(
                 msg["properties"]["$groups"],
-                {"company": "id:5", "instance": "app.hanzo_insights.com"},
+                {"company": "id:5", "instance": "app.posthog.com"},
             )
 
     def test_session_id_with_anonymous_event(self):
@@ -1920,7 +1920,7 @@ class TestClient(unittest.TestCase):
         client.get_feature_flag("random_key", "some_id", disable_geoip=True)
         patch_flags.assert_called_with(
             "random_key",
-            "https://us.i.hanzo_insights.com",
+            "https://us.i.posthog.com",
             timeout=3,
             distinct_id="some_id",
             groups={},
@@ -1936,7 +1936,7 @@ class TestClient(unittest.TestCase):
         )
         patch_flags.assert_called_with(
             "random_key",
-            "https://us.i.hanzo_insights.com",
+            "https://us.i.posthog.com",
             timeout=3,
             distinct_id="feature_enabled_distinct_id",
             groups={},
@@ -1950,7 +1950,7 @@ class TestClient(unittest.TestCase):
         client.get_all_flags_and_payloads("all_flags_payloads_id")
         patch_flags.assert_called_with(
             "random_key",
-            "https://us.i.hanzo_insights.com",
+            "https://us.i.posthog.com",
             timeout=3,
             distinct_id="all_flags_payloads_id",
             groups={},
@@ -1983,27 +1983,27 @@ class TestClient(unittest.TestCase):
         }
         client = Client(
             FAKE_TEST_API_KEY,
-            host="http://app2.hanzo_insights.com",
+            host="http://app2.posthog.com",
             on_error=self.set_fail,
             disable_geoip=False,
         )
         client.get_feature_flag(
             "random_key",
             "some_id",
-            groups={"company": "id:5", "instance": "app.hanzo_insights.com"},
+            groups={"company": "id:5", "instance": "app.posthog.com"},
             person_properties={"x1": "y1"},
             group_properties={"company": {"x": "y"}},
         )
         patch_flags.assert_called_with(
             "random_key",
-            "http://app2.hanzo_insights.com",
+            "http://app2.posthog.com",
             timeout=3,
             distinct_id="some_id",
-            groups={"company": "id:5", "instance": "app.hanzo_insights.com"},
+            groups={"company": "id:5", "instance": "app.posthog.com"},
             person_properties={"distinct_id": "some_id", "x1": "y1"},
             group_properties={
                 "company": {"$group_key": "id:5", "x": "y"},
-                "instance": {"$group_key": "app.hanzo_insights.com"},
+                "instance": {"$group_key": "app.posthog.com"},
             },
             geoip_disable=False,
             device_id=None,
@@ -2014,7 +2014,7 @@ class TestClient(unittest.TestCase):
         client.get_feature_flag(
             "random_key",
             "some_id",
-            groups={"company": "id:5", "instance": "app.hanzo_insights.com"},
+            groups={"company": "id:5", "instance": "app.posthog.com"},
             person_properties={"distinct_id": "override"},
             group_properties={
                 "company": {
@@ -2024,14 +2024,14 @@ class TestClient(unittest.TestCase):
         )
         patch_flags.assert_called_with(
             "random_key",
-            "http://app2.hanzo_insights.com",
+            "http://app2.posthog.com",
             timeout=3,
             distinct_id="some_id",
-            groups={"company": "id:5", "instance": "app.hanzo_insights.com"},
+            groups={"company": "id:5", "instance": "app.posthog.com"},
             person_properties={"distinct_id": "override"},
             group_properties={
                 "company": {"$group_key": "group_override"},
-                "instance": {"$group_key": "app.hanzo_insights.com"},
+                "instance": {"$group_key": "app.posthog.com"},
             },
             geoip_disable=False,
             device_id=None,
@@ -2045,7 +2045,7 @@ class TestClient(unittest.TestCase):
         )
         patch_flags.assert_called_with(
             "random_key",
-            "http://app2.hanzo_insights.com",
+            "http://app2.posthog.com",
             timeout=3,
             distinct_id="some_id",
             groups={},
@@ -2107,7 +2107,7 @@ class TestClient(unittest.TestCase):
             expected_call["flag_keys_to_evaluate"] = expected_flag_keys
 
         patch_flags.assert_called_with(
-            "random_key", "https://us.i.hanzo_insights.com", timeout=3, **expected_call
+            "random_key", "https://us.i.posthog.com", timeout=3, **expected_call
         )
 
     @mock.patch("hanzo_insights.client.flags")
@@ -2131,7 +2131,7 @@ class TestClient(unittest.TestCase):
             client.get_feature_flag("random_key", "some_id")
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.hanzo_insights.com",
+                "https://us.i.posthog.com",
                 timeout=3,
                 distinct_id="some_id",
                 groups={},
@@ -2151,7 +2151,7 @@ class TestClient(unittest.TestCase):
             )
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.hanzo_insights.com",
+                "https://us.i.posthog.com",
                 timeout=3,
                 distinct_id="some_id",
                 groups={},

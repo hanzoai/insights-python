@@ -2,7 +2,7 @@ import time
 import uuid
 from typing import Any, Callable, Dict, List, Optional, cast
 
-from posthog import get_tags, identify_context, new_context, tag, contexts
+from hanzo_insights import get_tags, identify_context, new_context, tag, contexts
 from hanzo_insights.ai.sanitization import (
     sanitize_anthropic,
     sanitize_gemini,
@@ -10,7 +10,7 @@ from hanzo_insights.ai.sanitization import (
     sanitize_openai,
 )
 from hanzo_insights.ai.types import FormattedMessage, StreamingEventData, TokenUsage
-from hanzo_insights.client import Client as PostHogClient
+from hanzo_insights.client import Client as InsightsClient
 
 
 _TOKEN_PROPERTY_KEYS = frozenset(
@@ -40,7 +40,7 @@ def serialize_raw_usage(raw_usage: Any) -> Optional[Dict[str, Any]]:
     Convert raw provider usage objects to JSON-serializable dicts.
 
     Handles Pydantic models (OpenAI/Anthropic) and protobuf-like objects (Gemini)
-    with a fallback chain to ensure we never pass unserializable objects to PostHog.
+    with a fallback chain to ensure we never pass unserializable objects to Insights.
 
     Args:
         raw_usage: Raw usage object from provider SDK
@@ -320,7 +320,7 @@ def merge_system_prompt(
 
 def call_llm_and_track_usage(
     posthog_distinct_id: Optional[str],
-    ph_client: PostHogClient,
+    ph_client: InsightsClient,
     provider: str,
     posthog_trace_id: Optional[str],
     posthog_properties: Optional[Dict[str, Any]],
@@ -469,7 +469,7 @@ def call_llm_and_track_usage(
 
 async def call_llm_and_track_usage_async(
     posthog_distinct_id: Optional[str],
-    ph_client: PostHogClient,
+    ph_client: InsightsClient,
     provider: str,
     posthog_trace_id: Optional[str],
     posthog_properties: Optional[Dict[str, Any]],
@@ -625,14 +625,14 @@ def sanitize_messages(data: Any, provider: str) -> Any:
     return data
 
 
-def with_privacy_mode(ph_client: PostHogClient, privacy_mode: bool, value: Any):
+def with_privacy_mode(ph_client: InsightsClient, privacy_mode: bool, value: Any):
     if ph_client.privacy_mode or privacy_mode:
         return None
     return value
 
 
 def capture_streaming_event(
-    ph_client: PostHogClient,
+    ph_client: InsightsClient,
     event_data: StreamingEventData,
 ):
     """
@@ -642,15 +642,15 @@ def capture_streaming_event(
     All provider-specific formatting should be done BEFORE calling this function.
 
     The function handles:
-    - Building PostHog event properties
+    - Building Insights event properties
     - Extracting and adding tools based on provider
     - Applying privacy mode
     - Adding special token fields (cache, reasoning)
     - Provider-specific fields (e.g., OpenAI instructions)
-    - Sending the event to PostHog
+    - Sending the event to Insights
 
     Args:
-        ph_client: PostHog client instance
+        ph_client: Insights client instance
         event_data: Standardized streaming event data containing all necessary information
     """
     trace_id = event_data.get("trace_id") or str(uuid.uuid4())
@@ -747,7 +747,7 @@ def capture_streaming_event(
     if event_data.get("distinct_id") is None:
         event_properties["$process_person_profile"] = False
 
-    # Send event to PostHog
+    # Send event to Insights
     if hasattr(ph_client, "capture"):
         ph_client.capture(
             distinct_id=event_data.get("distinct_id") or trace_id,

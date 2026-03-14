@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Simple test script for PostHog remote config endpoint.
+Simple test script for Insights remote config endpoint.
 """
 
-import posthog
+import hanzo_insights
 
-# Initialize PostHog client
+# Initialize Insights client
 hanzo_insights.api_key = "phc_..."
 hanzo_insights.personal_api_key = "phs_..."  # or "phx_..."
-hanzo_insights.host = "http://localhost:8000"  # or "https://us.hanzo_insights.com"
+hanzo_insights.host = "http://localhost:8000"  # or "https://us.posthog.com"
 hanzo_insights.debug = True
 
 
