@@ -20,7 +20,7 @@ if not settings.configured:
     )
     django.setup()
 
-from hanzo_insights.integrations.django import PosthogContextMiddleware
+from hanzo_insights.integrations.django import InsightsContextMiddleware
 
 
 class MockRequest:
@@ -45,7 +45,7 @@ class MockRequest:
         return f"{scheme}://{self._host}{self.path}"
 
 
-class TestPosthogContextMiddleware(unittest.TestCase):
+class TestInsightsContextMiddleware(unittest.TestCase):
     def create_middleware(
         self,
         extra_tags=None,
@@ -60,24 +60,24 @@ class TestPosthogContextMiddleware(unittest.TestCase):
 
         with patch("django.conf.settings") as mock_settings:
             # Configure mock settings
-            mock_settings.POSTHOG_MW_EXTRA_TAGS = extra_tags
-            mock_settings.POSTHOG_MW_REQUEST_FILTER = request_filter
-            mock_settings.POSTHOG_MW_TAG_MAP = tag_map
-            mock_settings.POSTHOG_MW_CAPTURE_EXCEPTIONS = capture_exceptions
-            mock_settings.POSTHOG_MW_CLIENT = None
+            mock_settings.INSIGHTS_MW_EXTRA_TAGS = extra_tags
+            mock_settings.INSIGHTS_MW_REQUEST_FILTER = request_filter
+            mock_settings.INSIGHTS_MW_TAG_MAP = tag_map
+            mock_settings.INSIGHTS_MW_CAPTURE_EXCEPTIONS = capture_exceptions
+            mock_settings.INSIGHTS_MW_CLIENT = None
 
             # Make hasattr work correctly
             def mock_hasattr(obj, name):
                 return name in [
-                    "POSTHOG_MW_EXTRA_TAGS",
-                    "POSTHOG_MW_REQUEST_FILTER",
-                    "POSTHOG_MW_TAG_MAP",
-                    "POSTHOG_MW_CAPTURE_EXCEPTIONS",
-                    "POSTHOG_MW_CLIENT",
+                    "INSIGHTS_MW_EXTRA_TAGS",
+                    "INSIGHTS_MW_REQUEST_FILTER",
+                    "INSIGHTS_MW_TAG_MAP",
+                    "INSIGHTS_MW_CAPTURE_EXCEPTIONS",
+                    "INSIGHTS_MW_CLIENT",
                 ]
 
             with patch("builtins.hasattr", side_effect=mock_hasattr):
-                middleware = PosthogContextMiddleware(get_response)
+                middleware = InsightsContextMiddleware(get_response)
 
         return middleware
 
@@ -87,8 +87,8 @@ class TestPosthogContextMiddleware(unittest.TestCase):
             middleware = self.create_middleware()
             request = MockRequest(
                 headers={
-                    "X-POSTHOG-SESSION-ID": "session-123",
-                    "X-POSTHOG-DISTINCT-ID": "user-456",
+                    "X-INSIGHTS-SESSION-ID": "session-123",
+                    "X-INSIGHTS-DISTINCT-ID": "user-456",
                 },
                 method="POST",
                 path="/api/test",
@@ -104,7 +104,7 @@ class TestPosthogContextMiddleware(unittest.TestCase):
             self.assertEqual(tags["$request_method"], "POST")
 
     def test_extract_tags_missing_headers(self):
-        """Test tag extraction when PostHog headers are missing"""
+        """Test tag extraction when Insights headers are missing"""
 
         with new_context():
             middleware = self.create_middleware()
@@ -118,12 +118,12 @@ class TestPosthogContextMiddleware(unittest.TestCase):
             self.assertEqual(tags["$request_method"], "GET")
 
     def test_extract_tags_partial_headers(self):
-        """Test tag extraction with only some PostHog headers present"""
+        """Test tag extraction with only some Insights headers present"""
 
         with new_context():
             middleware = self.create_middleware()
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "session-only"}, method="PUT"
+                headers={"X-INSIGHTS-SESSION-ID": "session-only"}, method="PUT"
             )
 
             tags = middleware.extract_tags(request)
@@ -141,7 +141,7 @@ class TestPosthogContextMiddleware(unittest.TestCase):
         with new_context():
             middleware = self.create_middleware(extra_tags=extra_tags_func)
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "session-123"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "session-123"}, method="GET"
             )
 
             tags = middleware.extract_tags(request)
@@ -167,7 +167,7 @@ class TestPosthogContextMiddleware(unittest.TestCase):
                 tag_map=tag_map_func, extra_tags=extra_tags_func
             )
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "session-123"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "session-123"}, method="GET"
             )
 
             tags = middleware.extract_tags(request)
@@ -230,7 +230,7 @@ class TestPosthogContextMiddleware(unittest.TestCase):
         middleware.client = mock_client
 
         request = MockRequest(
-            headers={"X-POSTHOG-DISTINCT-ID": "test-user"},
+            headers={"X-INSIGHTS-DISTINCT-ID": "test-user"},
             method="POST",
             path="/api/endpoint",
         )
@@ -282,7 +282,7 @@ class TestPosthogContextMiddleware(unittest.TestCase):
         mock_client.capture_exception.assert_not_called()
 
 
-class TestPosthogContextMiddlewareSync(unittest.TestCase):
+class TestInsightsContextMiddlewareSync(unittest.TestCase):
     """Test synchronous middleware behavior"""
 
     def test_sync_middleware_call(self):
@@ -291,13 +291,13 @@ class TestPosthogContextMiddlewareSync(unittest.TestCase):
         get_response = Mock(return_value=mock_response)
 
         # Create middleware with sync get_response
-        middleware = PosthogContextMiddleware(get_response)
+        middleware = InsightsContextMiddleware(get_response)
 
         # Verify sync mode detected
         self.assertFalse(middleware._is_coroutine)
 
         request = MockRequest(
-            headers={"X-POSTHOG-SESSION-ID": "test-session"},
+            headers={"X-INSIGHTS-SESSION-ID": "test-session"},
             method="GET",
             path="/test",
         )
@@ -318,7 +318,7 @@ class TestPosthogContextMiddlewareSync(unittest.TestCase):
         def request_filter(req):
             return False
 
-        middleware = PosthogContextMiddleware.__new__(PosthogContextMiddleware)
+        middleware = InsightsContextMiddleware.__new__(InsightsContextMiddleware)
         middleware.get_response = get_response
         middleware._is_coroutine = False
         middleware.request_filter = request_filter
@@ -351,7 +351,7 @@ class TestPosthogContextMiddlewareSync(unittest.TestCase):
         mock_client = Mock()
         get_response = Mock(return_value=Mock(status_code=500))
 
-        middleware = PosthogContextMiddleware(get_response)
+        middleware = InsightsContextMiddleware(get_response)
         middleware.client = mock_client
 
         def get_response_simulating_django(request):
@@ -380,7 +380,7 @@ class TestPosthogContextMiddlewareSync(unittest.TestCase):
             )
 
 
-class TestPosthogContextMiddlewareAsync(unittest.TestCase):
+class TestInsightsContextMiddlewareAsync(unittest.TestCase):
     """Test asynchronous middleware behavior"""
 
     def test_async_middleware_detection(self):
@@ -389,7 +389,7 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
         async def async_get_response(request):
             return Mock()
 
-        middleware = PosthogContextMiddleware(async_get_response)
+        middleware = InsightsContextMiddleware(async_get_response)
 
         # Verify async mode detected
         self.assertTrue(middleware._is_coroutine)
@@ -403,10 +403,10 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
             async def async_get_response(request):
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
 
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "async-session"},
+                headers={"X-INSIGHTS-SESSION-ID": "async-session"},
                 method="POST",
                 path="/async-test",
             )
@@ -434,7 +434,7 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
                 return mock_response
 
             # Properly initialize middleware
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             # Override request filter after initialization
             middleware.request_filter = lambda req: False
 
@@ -459,10 +459,10 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
                 self.assertEqual(session_id, "async-session-123")
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
 
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "async-session-123"},
+                headers={"X-INSIGHTS-SESSION-ID": "async-session-123"},
                 method="GET",
             )
 
@@ -483,7 +483,7 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
                 raise ValueError("Async test exception")
 
             # Properly initialize middleware
-            middleware = PosthogContextMiddleware(raise_exception)
+            middleware = InsightsContextMiddleware(raise_exception)
             middleware.client = mock_client  # Override with mock client
 
             request = MockRequest()
@@ -525,11 +525,11 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
                 self.assertEqual(distinct_id, "123")
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             middleware.client = Mock()
 
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "test-session"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "test-session"}, method="GET"
             )
 
             # Mock auser() to return authenticated user
@@ -561,11 +561,11 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
                 self.assertIsNone(distinct_id)
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             middleware.client = Mock()
 
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "test-session"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "test-session"}, method="GET"
             )
 
             async def mock_auser():
@@ -591,12 +591,12 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
             async def async_get_response(request):
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             middleware.client = Mock()
 
             # Request without auser method (no auth middleware)
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "test-session"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "test-session"}, method="GET"
             )
 
             with new_context():
@@ -621,12 +621,12 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
             async def async_get_response(request):
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             middleware.extra_tags = extra_tags_callback
             middleware.client = Mock()
 
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "test-session"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "test-session"}, method="GET"
             )
 
             # Mock auser for no user
@@ -658,12 +658,12 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
             async def async_get_response(request):
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             middleware.tag_map = tag_map_callback
             middleware.client = Mock()
 
             request = MockRequest(
-                headers={"X-POSTHOG-SESSION-ID": "test-session"}, method="GET"
+                headers={"X-INSIGHTS-SESSION-ID": "test-session"}, method="GET"
             )
 
             # Mock auser for no user
@@ -699,12 +699,12 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
                 self.assertEqual(session_id, "async-sess-123")
                 return mock_response
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
             middleware.client = Mock()
 
             request = MockRequest(
                 headers={
-                    "X-POSTHOG-SESSION-ID": "async-sess-123",
+                    "X-INSIGHTS-SESSION-ID": "async-sess-123",
                     "X-Forwarded-For": "192.168.1.1",
                     "User-Agent": "TestAgent/1.0",
                 },
@@ -725,13 +725,13 @@ class TestPosthogContextMiddlewareAsync(unittest.TestCase):
         asyncio.run(run_test())
 
 
-class TestPosthogContextMiddlewareHybrid(unittest.TestCase):
+class TestInsightsContextMiddlewareHybrid(unittest.TestCase):
     """Test hybrid middleware behavior with mixed sync/async chains"""
 
     def test_hybrid_flags_set(self):
         """Test that both capability flags are set"""
-        self.assertTrue(PosthogContextMiddleware.sync_capable)
-        self.assertTrue(PosthogContextMiddleware.async_capable)
+        self.assertTrue(InsightsContextMiddleware.sync_capable)
+        self.assertTrue(InsightsContextMiddleware.async_capable)
 
     def test_sync_to_async_routing(self):
         """Test that __call__ routes to __acall__ when async"""
@@ -740,7 +740,7 @@ class TestPosthogContextMiddlewareHybrid(unittest.TestCase):
             async def async_get_response(request):
                 return Mock()
 
-            middleware = PosthogContextMiddleware(async_get_response)
+            middleware = InsightsContextMiddleware(async_get_response)
 
             # Verify routing happens
             request = MockRequest()
@@ -759,7 +759,7 @@ class TestPosthogContextMiddlewareHybrid(unittest.TestCase):
         def sync_get_response(request):
             return mock_response
 
-        middleware = PosthogContextMiddleware(sync_get_response)
+        middleware = InsightsContextMiddleware(sync_get_response)
 
         request = MockRequest()
         result = middleware(request)

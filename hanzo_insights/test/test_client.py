@@ -61,7 +61,7 @@ class TestClient(unittest.TestCase):
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertIsNotNone(msg.get("uuid"))
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             # these will change between platforms so just asssert on presence here
             assert msg["properties"]["$python_runtime"] == mock.ANY
@@ -88,7 +88,7 @@ class TestClient(unittest.TestCase):
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertEqual(msg["uuid"], uuid)
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
 
     def test_basic_capture_with_project_api_key(self):
@@ -111,7 +111,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(msg["event"], "python test event")
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
 
     def test_basic_super_properties(self):
@@ -299,7 +299,7 @@ class TestClient(unittest.TestCase):
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertIsNotNone(msg.get("uuid"))
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertEqual(
                 msg["properties"]["$feature/beta-feature"], "random-variant"
@@ -424,7 +424,7 @@ class TestClient(unittest.TestCase):
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertIsNotNone(msg.get("uuid"))
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertEqual(
                 msg["properties"]["$feature/beta-feature-local"], "third-variant"
@@ -595,7 +595,7 @@ class TestClient(unittest.TestCase):
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertIsNotNone(msg.get("uuid"))
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertEqual(
                 msg["properties"]["$feature/beta-feature-local"], "my-custom-variant"
@@ -641,7 +641,7 @@ class TestClient(unittest.TestCase):
             self.assertIsNotNone(msg.get("uuid"))
             self.assertEqual(msg["distinct_id"], "distinct_id")
             self.assertTrue(msg["properties"]["$geoip_disable"])
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertEqual(
                 msg["properties"]["$feature/beta-feature"], "random-variant"
@@ -655,7 +655,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(patch_flags.call_count, 1)
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.posthog.com",
+                "https://us.i.insights.hanzo.ai",
                 timeout=3,
                 distinct_id="distinct_id",
                 groups={},
@@ -706,7 +706,7 @@ class TestClient(unittest.TestCase):
             self.assertIsNotNone(msg.get("uuid"))
             self.assertTrue("$geoip_disable" not in msg["properties"])
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertEqual(
                 msg["properties"]["$feature/beta-feature"], "random-variant"
@@ -720,7 +720,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(patch_flags.call_count, 1)
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.posthog.com",
+                "https://us.i.insights.hanzo.ai",
                 timeout=12,
                 distinct_id="distinct_id",
                 groups={},
@@ -758,7 +758,7 @@ class TestClient(unittest.TestCase):
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertIsNotNone(msg.get("uuid"))
             self.assertEqual(msg["distinct_id"], "distinct_id")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertTrue("$feature/beta-feature" not in msg["properties"])
             self.assertTrue("$active_feature_flags" not in msg["properties"])
@@ -1156,7 +1156,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(msg["timestamp"], "2014-09-03T00:00:00+00:00")
             self.assertEqual(msg["properties"]["property"], "value")
             self.assertEqual(msg["event"], "python test event")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertEqual(msg["uuid"], "new-uuid")
             self.assertEqual(msg["distinct_id"], "distinct_id")
@@ -1221,7 +1221,7 @@ class TestClient(unittest.TestCase):
 
             self.assertEqual(msg["timestamp"], "2014-09-03T00:00:00+00:00")
             self.assertEqual(msg["$set"]["trait"], "value")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertEqual(msg["uuid"], "new-uuid")
@@ -1265,7 +1265,7 @@ class TestClient(unittest.TestCase):
 
             self.assertEqual(msg["timestamp"], "2014-09-03T00:00:00+00:00")
             self.assertEqual(msg["$set_once"]["trait"], "value")
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
             self.assertTrue(isinstance(msg["timestamp"], str))
             self.assertEqual(msg["uuid"], "new-uuid")
@@ -1290,7 +1290,7 @@ class TestClient(unittest.TestCase):
                     "$group_type": "organization",
                     "$group_key": "id:5",
                     "$group_set": {},
-                    "$lib": "posthog-python",
+                    "$lib": "insights-python",
                     "$lib_version": VERSION,
                     "$geoip_disable": True,
                 },
@@ -1319,7 +1319,7 @@ class TestClient(unittest.TestCase):
                     "$group_type": "organization",
                     "$group_key": "id:5",
                     "$group_set": {},
-                    "$lib": "posthog-python",
+                    "$lib": "insights-python",
                     "$lib_version": VERSION,
                     "$geoip_disable": True,
                 },
@@ -1352,7 +1352,7 @@ class TestClient(unittest.TestCase):
                     "$group_type": "organization",
                     "$group_key": "id:5",
                     "$group_set": {"trait": "value"},
-                    "$lib": "posthog-python",
+                    "$lib": "insights-python",
                     "$lib_version": VERSION,
                     "$geoip_disable": True,
                 },
@@ -1387,7 +1387,7 @@ class TestClient(unittest.TestCase):
                     "$group_type": "organization",
                     "$group_key": "id:5",
                     "$group_set": {"trait": "value"},
-                    "$lib": "posthog-python",
+                    "$lib": "insights-python",
                     "$lib_version": VERSION,
                     "$geoip_disable": True,
                 },
@@ -1454,7 +1454,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(msg["event"], "python test event")
             self.assertEqual(msg["distinct_id"], "distinct_id")
             self.assertEqual(msg["properties"]["$session_id"], session_id)
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
 
             # Check additional expected properties
@@ -1607,7 +1607,7 @@ class TestClient(unittest.TestCase):
                 self.assertEqual(msg["properties"][key], value)
 
             # Verify system properties are still added
-            self.assertEqual(msg["properties"]["$lib"], "posthog-python")
+            self.assertEqual(msg["properties"]["$lib"], "insights-python")
             self.assertEqual(msg["properties"]["$lib_version"], VERSION)
 
     @parameterized.expand(
@@ -1920,7 +1920,7 @@ class TestClient(unittest.TestCase):
         client.get_feature_flag("random_key", "some_id", disable_geoip=True)
         patch_flags.assert_called_with(
             "random_key",
-            "https://us.i.posthog.com",
+            "https://us.i.insights.hanzo.ai",
             timeout=3,
             distinct_id="some_id",
             groups={},
@@ -1936,7 +1936,7 @@ class TestClient(unittest.TestCase):
         )
         patch_flags.assert_called_with(
             "random_key",
-            "https://us.i.posthog.com",
+            "https://us.i.insights.hanzo.ai",
             timeout=3,
             distinct_id="feature_enabled_distinct_id",
             groups={},
@@ -1950,7 +1950,7 @@ class TestClient(unittest.TestCase):
         client.get_all_flags_and_payloads("all_flags_payloads_id")
         patch_flags.assert_called_with(
             "random_key",
-            "https://us.i.posthog.com",
+            "https://us.i.insights.hanzo.ai",
             timeout=3,
             distinct_id="all_flags_payloads_id",
             groups={},
@@ -2107,7 +2107,7 @@ class TestClient(unittest.TestCase):
             expected_call["flag_keys_to_evaluate"] = expected_flag_keys
 
         patch_flags.assert_called_with(
-            "random_key", "https://us.i.posthog.com", timeout=3, **expected_call
+            "random_key", "https://us.i.insights.hanzo.ai", timeout=3, **expected_call
         )
 
     @mock.patch("hanzo_insights.client.flags")
@@ -2131,7 +2131,7 @@ class TestClient(unittest.TestCase):
             client.get_feature_flag("random_key", "some_id")
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.posthog.com",
+                "https://us.i.insights.hanzo.ai",
                 timeout=3,
                 distinct_id="some_id",
                 groups={},
@@ -2151,7 +2151,7 @@ class TestClient(unittest.TestCase):
             )
             patch_flags.assert_called_with(
                 "random_key",
-                "https://us.i.posthog.com",
+                "https://us.i.insights.hanzo.ai",
                 timeout=3,
                 distinct_id="some_id",
                 groups={},

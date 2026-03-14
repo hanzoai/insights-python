@@ -121,13 +121,13 @@ async def test_async_client_basic_generation(
         return_value=mock_gemini_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     response = await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Tell me a fun fact about hedgehogs"],
-        posthog_distinct_id="test-id",
-        posthog_properties={"foo": "bar"},
+        insights_distinct_id="test-id",
+        insights_properties={"foo": "bar"},
     )
 
     assert response == mock_gemini_response
@@ -178,13 +178,13 @@ async def test_async_client_streaming_with_generate_content_stream(
         return_value=mock_streaming_response()
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     response = await client.models.generate_content_stream(
         model="gemini-2.0-flash",
         contents=["Write a short story"],
-        posthog_distinct_id="test-id",
-        posthog_properties={"feature": "streaming"},
+        insights_distinct_id="test-id",
+        insights_properties={"feature": "streaming"},
     )
 
     chunks = []
@@ -239,7 +239,7 @@ async def test_async_client_streaming_with_tools(mock_client, mock_google_genai_
         return_value=mock_streaming_response()
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     # Create mock tools configuration
     mock_tool = MagicMock()
@@ -267,8 +267,8 @@ async def test_async_client_streaming_with_tools(mock_client, mock_google_genai_
         model="gemini-2.0-flash",
         contents=["What's the weather in SF?"],
         config=mock_config,
-        posthog_distinct_id="test-id",
-        posthog_properties={"feature": "streaming_with_tools"},
+        insights_distinct_id="test-id",
+        insights_properties={"feature": "streaming_with_tools"},
     )
 
     chunks = []
@@ -305,13 +305,13 @@ async def test_async_client_groups(
         return_value=mock_gemini_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
-        posthog_groups={"company": "company_123"},
+        insights_distinct_id="test-id",
+        insights_groups={"company": "company_123"},
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -326,13 +326,13 @@ async def test_async_client_privacy_mode_local(
         return_value=mock_gemini_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
-        posthog_privacy_mode=True,
+        insights_distinct_id="test-id",
+        insights_privacy_mode=True,
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -351,12 +351,12 @@ async def test_async_client_privacy_mode_global(
         return_value=mock_gemini_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -373,11 +373,11 @@ async def test_async_client_different_input_formats(
         return_value=mock_gemini_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     # Test string input
     await client.models.generate_content(
-        model="gemini-2.0-flash", contents="Hello", posthog_distinct_id="test-id"
+        model="gemini-2.0-flash", contents="Hello", insights_distinct_id="test-id"
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -388,7 +388,7 @@ async def test_async_client_different_input_formats(
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[{"role": "user", "parts": [{"text": "hey"}]}],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -401,7 +401,7 @@ async def test_async_client_different_input_formats(
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[{"role": "user", "parts": [{"text": "Hello "}, {"text": "world"}]}],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -418,7 +418,7 @@ async def test_async_client_different_input_formats(
     # Test list input with string
     mock_client.capture.reset_mock()
     await client.models.generate_content(
-        model="gemini-2.0-flash", contents=["List item"], posthog_distinct_id="test-id"
+        model="gemini-2.0-flash", contents=["List item"], insights_distinct_id="test-id"
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -433,12 +433,12 @@ async def test_async_client_model_parameters(
         return_value=mock_gemini_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
         temperature=0.7,
         max_tokens=100,
     )
@@ -452,18 +452,18 @@ async def test_async_client_model_parameters(
 async def test_async_client_default_settings(
     mock_client, mock_google_genai_client, mock_gemini_response
 ):
-    """Test async client with default PostHog settings"""
+    """Test async client with default Insights settings"""
     mock_google_genai_client.aio.models.generate_content = AsyncMock(
         return_value=mock_gemini_response
     )
 
     client = AsyncClient(
         api_key="test-key",
-        posthog_client=mock_client,
-        posthog_distinct_id="default_user",
-        posthog_properties={"team": "ai"},
-        posthog_privacy_mode=False,
-        posthog_groups={"company": "acme_corp"},
+        insights_client=mock_client,
+        insights_distinct_id="default_user",
+        insights_properties={"team": "ai"},
+        insights_privacy_mode=False,
+        insights_groups={"company": "acme_corp"},
     )
 
     # Call without overriding defaults
@@ -487,21 +487,21 @@ async def test_async_client_override_defaults(
 
     client = AsyncClient(
         api_key="test-key",
-        posthog_client=mock_client,
-        posthog_distinct_id="default_user",
-        posthog_properties={"team": "ai"},
-        posthog_privacy_mode=False,
-        posthog_groups={"company": "acme_corp"},
+        insights_client=mock_client,
+        insights_distinct_id="default_user",
+        insights_properties={"team": "ai"},
+        insights_privacy_mode=False,
+        insights_groups={"company": "acme_corp"},
     )
 
     # Override defaults in call
     await client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="specific_user",
-        posthog_properties={"feature": "chat", "urgent": True},
-        posthog_privacy_mode=True,
-        posthog_groups={"organization": "special_org"},
+        insights_distinct_id="specific_user",
+        insights_properties={"feature": "chat", "urgent": True},
+        insights_privacy_mode=True,
+        insights_groups={"organization": "special_org"},
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -539,7 +539,7 @@ async def test_async_vertex_ai_parameters_passed_through(
         location="us-central1",
         debug_config=mock_debug_config,
         http_options=mock_http_options,
-        posthog_client=mock_client,
+        insights_client=mock_client,
     )
 
     # Verify genai.Client was called with correct parameters
@@ -559,7 +559,7 @@ async def test_async_api_key_mode(mock_client, mock_google_genai_client):
     # Create async client with just API key (traditional mode)
     AsyncClient(
         api_key="test-api-key",
-        posthog_client=mock_client,
+        insights_client=mock_client,
     )
 
     # Verify genai.Client was called with only api_key
@@ -574,12 +574,12 @@ async def test_async_function_calls_in_output_choices(
         return_value=mock_gemini_response_with_function_calls
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     response = await client.models.generate_content(
         model="gemini-2.5-flash",
         contents=["What's the weather in San Francisco?"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_gemini_response_with_function_calls
@@ -637,12 +637,12 @@ async def test_async_cache_and_reasoning_tokens(mock_client, mock_google_genai_c
         return_value=mock_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     response = await client.models.generate_content(
         model="gemini-2.5-pro",
         contents="Test with cache",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_response
@@ -689,12 +689,12 @@ async def test_async_streaming_cache_and_reasoning_tokens(
         return_value=mock_streaming_response()
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     response = await client.models.generate_content_stream(
         model="gemini-2.5-pro",
         contents="Test streaming with cache",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     # Consume the stream
@@ -704,7 +704,7 @@ async def test_async_streaming_cache_and_reasoning_tokens(
 
     assert len(result) == 2
 
-    # Check PostHog capture was called
+    # Check Insights capture was called
     assert mock_client.capture.call_count == 1
 
     call_args = mock_client.capture.call_args[1]
@@ -761,11 +761,11 @@ async def test_async_web_search_grounding(mock_client, mock_google_genai_client)
         return_value=mock_response
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
     response = await client.models.generate_content(
         model="gemini-2.5-flash",
         contents="What's the latest news?",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_response
@@ -829,12 +829,12 @@ async def test_async_streaming_with_web_search(mock_client, mock_google_genai_cl
         return_value=mock_streaming_response()
     )
 
-    client = AsyncClient(api_key="test-key", posthog_client=mock_client)
+    client = AsyncClient(api_key="test-key", insights_client=mock_client)
 
     response = await client.models.generate_content_stream(
         model="gemini-2.5-flash",
         contents="What's the latest news?",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     chunks = []

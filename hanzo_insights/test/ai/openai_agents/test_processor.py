@@ -16,7 +16,7 @@ try:
         TranscriptionSpanData,
     )
 
-    from hanzo_insights.ai.openai_agents import PostHogTracingProcessor, instrument
+    from hanzo_insights.ai.openai_agents import InsightsTracingProcessor, instrument
 
     OPENAI_AGENTS_AVAILABLE = True
 except ImportError:
@@ -39,7 +39,7 @@ def mock_client():
 
 @pytest.fixture(scope="function")
 def processor(mock_client):
-    return PostHogTracingProcessor(
+    return InsightsTracingProcessor(
         client=mock_client,
         distinct_id="test-user",
         privacy_mode=False,
@@ -68,12 +68,12 @@ def mock_span():
     return span
 
 
-class TestPostHogTracingProcessor:
-    """Tests for the PostHogTracingProcessor class."""
+class TestInsightsTracingProcessor:
+    """Tests for the InsightsTracingProcessor class."""
 
     def test_initialization(self, mock_client):
         """Test processor initializes correctly."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id="user@example.com",
             privacy_mode=True,
@@ -93,7 +93,7 @@ class TestPostHogTracingProcessor:
         def resolver(trace):
             return trace.metadata.get("user_id", "default")
 
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id=resolver,
         )
@@ -127,7 +127,7 @@ class TestPostHogTracingProcessor:
 
     def test_personless_mode_when_no_distinct_id(self, mock_client, mock_trace):
         """Test that trace events use personless mode when no distinct_id is provided."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
         )
 
@@ -143,7 +143,7 @@ class TestPostHogTracingProcessor:
         self, mock_client, mock_trace, mock_span
     ):
         """Test that span events use personless mode when no distinct_id is provided."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
         )
 
@@ -168,7 +168,7 @@ class TestPostHogTracingProcessor:
         def resolver(trace):
             return None  # Simulate no user ID available
 
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id=resolver,
         )
@@ -188,7 +188,7 @@ class TestPostHogTracingProcessor:
 
     def test_person_profile_when_distinct_id_provided(self, mock_client, mock_trace):
         """Test that events create person profiles when distinct_id is provided."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id="real-user",
         )
@@ -375,7 +375,7 @@ class TestPostHogTracingProcessor:
 
     def test_privacy_mode_redacts_content(self, mock_client, mock_span):
         """Test that privacy_mode redacts input/output content."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id="test-user",
             privacy_mode=True,
@@ -636,7 +636,7 @@ class TestPostHogTracingProcessor:
 
     def test_groups_included_in_events(self, mock_client, mock_trace, mock_span):
         """Test that groups are included in captured events."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id="test-user",
             groups={"company": "acme", "team": "engineering"},
@@ -650,7 +650,7 @@ class TestPostHogTracingProcessor:
 
     def test_additional_properties_included(self, mock_client, mock_trace):
         """Test that additional properties are included in events."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id="test-user",
             properties={"environment": "production", "version": "1.0"},
@@ -734,7 +734,7 @@ class TestPostHogTracingProcessor:
         def resolver(trace):
             return f"user-{trace.name}"
 
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id=resolver,
         )
@@ -755,7 +755,7 @@ class TestPostHogTracingProcessor:
 
     def test_eviction_of_stale_entries(self, mock_client):
         """Test that stale entries are evicted when max is exceeded."""
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             client=mock_client,
             distinct_id="test-user",
         )
@@ -785,7 +785,7 @@ class TestInstrumentHelper:
             )
 
             mock_add.assert_called_once_with(processor)
-            assert isinstance(processor, PostHogTracingProcessor)
+            assert isinstance(processor, InsightsTracingProcessor)
 
     def test_instrument_with_privacy_mode(self, mock_client):
         """Test instrument() respects privacy_mode."""

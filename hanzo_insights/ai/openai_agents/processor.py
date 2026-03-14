@@ -861,7 +861,3 @@ class InsightsTracingProcessor(TracingProcessor):
                 self._client.flush()
         except Exception as e:
             log.debug(f"Error in force_flush: {e}")
-
-
-# Backward compatibility alias
-PostHogTracingProcessor = InsightsTracingProcessor
