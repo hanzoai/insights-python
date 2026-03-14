@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from posthog import identify_context, new_context
+from hanzo_insights import identify_context, new_context
 
 try:
     from anthropic.types import Message, Usage

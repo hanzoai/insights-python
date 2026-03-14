@@ -2,7 +2,7 @@
 OpenAI-specific conversion utilities.
 
 This module handles the conversion of OpenAI API responses and inputs
-into standardized formats for PostHog tracking. It supports both
+into standardized formats for Insights tracking. It supports both
 Chat Completions API and Responses API formats.
 """
 
@@ -753,7 +753,7 @@ def format_openai_streaming_input(
         api_type: Either "chat" or "responses"
 
     Returns:
-        Formatted input ready for PostHog tracking
+        Formatted input ready for Insights tracking
     """
     from hanzo_insights.ai.utils import merge_system_prompt
 

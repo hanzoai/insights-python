@@ -17,18 +17,18 @@ from hanzo_insights.ai.openai.openai_async import WrappedEmbeddings as AsyncWrap
 from hanzo_insights.ai.openai.openai_async import WrappedResponses as AsyncWrappedResponses
 from typing import Optional
 
-from hanzo_insights.client import Client as PostHogClient
-from posthog import setup
+from hanzo_insights.client import Client as InsightsClient
+from hanzo_insights import setup
 
 
 class AzureOpenAI(openai.AzureOpenAI):
     """
-    A wrapper around the Azure OpenAI SDK that automatically sends LLM usage events to PostHog.
+    A wrapper around the Azure OpenAI SDK that automatically sends LLM usage events to Insights.
     """
 
-    _ph_client: PostHogClient
+    _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[PostHogClient] = None, **kwargs):
+    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: Azure OpenAI API key.
@@ -61,12 +61,12 @@ class AzureOpenAI(openai.AzureOpenAI):
 
 class AsyncAzureOpenAI(openai.AsyncAzureOpenAI):
     """
-    An async wrapper around the Azure OpenAI SDK that automatically sends LLM usage events to PostHog.
+    An async wrapper around the Azure OpenAI SDK that automatically sends LLM usage events to Insights.
     """
 
-    _ph_client: PostHogClient
+    _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[PostHogClient] = None, **kwargs):
+    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: Azure OpenAI API key.

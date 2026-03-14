@@ -137,7 +137,7 @@ def set_socket_options(socket_options: Optional[SocketOptions]) -> None:
     Configure socket options for all HTTP connections.
 
     Example:
-        from posthog import set_socket_options
+        from hanzo_insights import set_socket_options
         set_socket_options([(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)])
     """
     global _session, _flags_session, _socket_options
@@ -159,19 +159,19 @@ def disable_connection_reuse() -> None:
     _pooling_enabled = False
 
 
-US_INGESTION_ENDPOINT = "https://us.i.hanzo_insights.com"
-EU_INGESTION_ENDPOINT = "https://eu.i.hanzo_insights.com"
+US_INGESTION_ENDPOINT = "https://us.i.posthog.com"
+EU_INGESTION_ENDPOINT = "https://eu.i.posthog.com"
 DEFAULT_HOST = US_INGESTION_ENDPOINT
-USER_AGENT = "posthog-python/" + VERSION
+USER_AGENT = "hanzo-insights-python/" + VERSION
 
 
 def determine_server_host(host: Optional[str]) -> str:
     """Determines the server host to use."""
     host_or_default = host or DEFAULT_HOST
     trimmed_host = remove_trailing_slash(host_or_default)
-    if trimmed_host in ("https://app.hanzo_insights.com", "https://us.hanzo_insights.com"):
+    if trimmed_host in ("https://app.posthog.com", "https://us.posthog.com", "https://insights.hanzo.ai"):
         return US_INGESTION_ENDPOINT
-    elif trimmed_host == "https://eu.hanzo_insights.com":
+    elif trimmed_host == "https://eu.posthog.com":
         return EU_INGESTION_ENDPOINT
     else:
         return host_or_default
@@ -231,7 +231,7 @@ def _process_response(
             and "feature_flags" in response["quotaLimited"]
         ):
             log.warning(
-                "[FEATURE FLAGS] PostHog feature flags quota limited, resetting feature flag data.  Learn more about billing limits at https://hanzo_insights.com/docs/billing/limits-alerts"
+                "[FEATURE FLAGS] Feature flags quota limited, resetting feature flag data. Learn more about billing limits at https://insights.hanzo.ai/docs/billing/limits-alerts"
             )
             raise QuotaLimitError(res.status_code, "Feature flags quota limited")
         return response
@@ -375,7 +375,7 @@ class APIError(Exception):
         self.retry_after = retry_after
 
     def __str__(self):
-        msg = "[PostHog] {0} ({1})"
+        msg = "[Insights] {0} ({1})"
         return msg.format(self.message, self.status)
 
 

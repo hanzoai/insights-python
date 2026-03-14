@@ -2,7 +2,7 @@ import unittest
 
 from parameterized import parameterized
 
-from posthog import utils
+from hanzo_insights import utils
 
 
 class TestSizeLimitedDict(unittest.TestCase):

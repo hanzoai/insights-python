@@ -1,10 +1,11 @@
-# LLM.md - Hanzo Posthog Python
+# LLM.md - Hanzo Insights Python SDK
 
 ## Overview
-Integrate Hanzo Insights into any python application.
+Integrate Hanzo Insights into any Python application. Package name: `hanzo-insights` on PyPI.
 
 ## Tech Stack
-- **Language**: Python
+- **Language**: Python 3.10+
+- **Package**: `hanzo_insights` (import name), `hanzo-insights` (pip name)
 
 ## Build & Run
 ```bash
@@ -15,24 +16,26 @@ uv run pytest
 ## Structure
 ```
 posthog-python/
-  BEFORE_SEND.md
-  CHANGELOG.md
-  CODEOWNERS
-  LICENSE
-  MANIFEST.in
-  Makefile
-  README.md
-  README_ANALYTICS.md
-  bin/
-  e2e_test.sh
-  example.py
+  hanzo_insights/        # Main package
+    __init__.py          # Module-level API, Insights class (alias: Posthog)
+    client.py            # Client class
+    ai/                  # AI provider integrations (OpenAI, Anthropic, Gemini, LangChain)
+    integrations/        # Framework integrations (Django middleware)
+    test/                # Tests
   examples/
-  hanzo_insights/
   integration_tests/
-  mypy-baseline.txt
+  pyproject.toml         # Package config (name: hanzo-insights)
+  setup.py               # Legacy setup
 ```
 
 ## Key Files
-- `README.md` -- Project documentation
-- `pyproject.toml` -- Python project config
-- `Makefile` -- Build automation
+- `pyproject.toml` -- Package config, dependencies, test config
+- `hanzo_insights/__init__.py` -- Public API surface
+- `hanzo_insights/client.py` -- Client implementation
+
+## Rebrand Notes
+- Main class: `Insights` (backward compat alias: `Posthog = Insights`)
+- Django middleware: `InsightsContextMiddleware` (alias: `PosthogContextMiddleware`)
+- OpenAI Agents: `InsightsTracingProcessor` (alias: `PostHogTracingProcessor`)
+- Internal protocol values (`$lib`, `posthog.com` ingestion URLs) kept for server compat
+- `posthog_*` parameter names in AI wrappers kept for API compat

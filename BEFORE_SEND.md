@@ -1,6 +1,6 @@
 # Before Send Hook
 
-The `before_send` parameter allows you to modify or filter events before they are sent to PostHog. This is useful for:
+The `before_send` parameter allows you to modify or filter events before they are sent to Insights. This is useful for:
 
 - **Privacy**: Removing or masking sensitive data (PII)
 - **Filtering**: Dropping unwanted events (test events, internal users, etc.)
@@ -10,12 +10,12 @@ The `before_send` parameter allows you to modify or filter events before they ar
 ## Basic Usage
 
 ```python
-import posthog
+import hanzo_insights
 from typing import Optional, Dict, Any
 
 def my_before_send(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
-    Process event before sending to PostHog.
+    Process event before sending to Insights.
     
     Args:
         event: The event dictionary containing 'event', 'distinct_id', 'properties', etc.
@@ -27,7 +27,7 @@ def my_before_send(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return event
 
 # Initialize client with before_send hook
-client = posthog.Client(
+client = hanzo_insights.Client(
     api_key="your-project-api-key",
     before_send=my_before_send
 )
@@ -166,7 +166,7 @@ def should_drop_event(event: dict[str, Any]) -> bool:
 
 ## Error Handling
 
-If your `before_send` function raises an exception, PostHog will:
+If your `before_send` function raises an exception, Insights will:
 
 1. Log the error 
 2. Continue with the original, unmodified event
@@ -184,7 +184,7 @@ def risky_before_send(event: dict[str, Any]) -> Optional[dict[str, Any]]:
 ## Complete Example
 
 ```python
-import posthog
+import hanzo_insights
 from typing import Optional, Any
 import re
 
@@ -227,7 +227,7 @@ def production_before_send(event: dict[str, Any]) -> Optional[dict[str, Any]]:
         return event  # Return original event on error
 
 # Usage
-client = posthog.Client(
+client = hanzo_insights.Client(
     api_key="your-api-key",
     before_send=production_before_send
 )

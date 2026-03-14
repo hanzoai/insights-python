@@ -2,7 +2,7 @@
 Gemini-specific conversion utilities.
 
 This module handles the conversion of Gemini API responses and inputs
-into standardized formats for PostHog tracking.
+into standardized formats for Insights tracking.
 """
 
 from typing import Any, Dict, List, Optional, TypedDict, Union
@@ -362,7 +362,7 @@ def format_gemini_input_with_system(
 
 def format_gemini_input(contents: Any) -> List[FormattedMessage]:
     """
-    Format Gemini input contents into standardized message format for PostHog tracking.
+    Format Gemini input contents into standardized message format for Insights tracking.
 
     This function handles various input formats:
     - String inputs

@@ -10,8 +10,8 @@ def test_excepthook(tmpdir):
     app.write(
         dedent(
             """
-    from posthog import Posthog
-    posthog = Posthog('phc_x', host='https://eu.i.hanzo_insights.com', enable_exception_autocapture=True, debug=True, on_error=lambda e, batch: print('error handling batch: ', e, batch))
+    from hanzo_insights import Posthog
+    posthog = Posthog('phc_x', host='https://eu.i.posthog.com', enable_exception_autocapture=True, debug=True, on_error=lambda e, batch: print('error handling batch: ', e, batch))
 
     # frame_value = "LOL"
 
@@ -27,7 +27,7 @@ def test_excepthook(tmpdir):
 
     assert b"ZeroDivisionError" in output
     assert b"LOL" in output
-    assert b"DEBUG:posthog:data uploaded successfully" in output
+    assert b"DEBUG:hanzo_insights:data uploaded successfully" in output
     assert (
         b'"$exception_list": [{"mechanism": {"type": "generic", "handled": true}, "module": null, "type": "ZeroDivisionError", "value": "division by zero", "stacktrace": {"frames": [{"platform": "python", "filename": "app.py", "abs_path"'
         in output
@@ -40,14 +40,14 @@ def test_code_variables_capture(tmpdir):
         dedent(
             """
     import os
-    from posthog import Posthog
+    from hanzo_insights import Posthog
     
     class UnserializableObject:
         pass
     
     posthog = Posthog(
         'phc_x', 
-        host='https://eu.i.hanzo_insights.com', 
+        host='https://eu.i.posthog.com', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -160,12 +160,12 @@ def test_code_variables_context_override(tmpdir):
         dedent(
             """
     import os
-    import posthog
-    from posthog import Posthog
+    import hanzo_insights
+    from hanzo_insights import Posthog
     
     posthog_client = Posthog(
         'phc_x', 
-        host='https://eu.i.hanzo_insights.com', 
+        host='https://eu.i.posthog.com', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=False,
@@ -205,11 +205,11 @@ def test_code_variables_size_limiter(tmpdir):
         dedent(
             """
     import os
-    from posthog import Posthog
+    from hanzo_insights import Posthog
     
     posthog = Posthog(
         'phc_x', 
-        host='https://eu.i.hanzo_insights.com', 
+        host='https://eu.i.posthog.com', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -299,11 +299,11 @@ def test_code_variables_disabled_capture(tmpdir):
         dedent(
             """
     import os
-    from posthog import Posthog
+    from hanzo_insights import Posthog
     
     posthog = Posthog(
         'phc_x', 
-        host='https://eu.i.hanzo_insights.com', 
+        host='https://eu.i.posthog.com', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=False,
@@ -340,12 +340,12 @@ def test_code_variables_enabled_then_disabled_in_context(tmpdir):
         dedent(
             """
     import os
-    import posthog
-    from posthog import Posthog
+    import hanzo_insights
+    from hanzo_insights import Posthog
     
     posthog_client = Posthog(
         'phc_x', 
-        host='https://eu.i.hanzo_insights.com', 
+        host='https://eu.i.posthog.com', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -388,7 +388,7 @@ def test_code_variables_repr_fallback(tmpdir):
     from datetime import datetime, timedelta
     from decimal import Decimal
     from fractions import Fraction
-    from posthog import Posthog
+    from hanzo_insights import Posthog
     
     class CustomReprClass:
         def __repr__(self):
@@ -396,7 +396,7 @@ def test_code_variables_repr_fallback(tmpdir):
     
     posthog = Posthog(
         'phc_x', 
-        host='https://eu.i.hanzo_insights.com', 
+        host='https://eu.i.posthog.com', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -458,11 +458,11 @@ def test_code_variables_too_long_string_value_replaced(tmpdir):
         dedent(
             """
     import os
-    from posthog import Posthog
+    from hanzo_insights import Posthog
 
     posthog = Posthog(
         'phc_x',
-        host='https://eu.i.hanzo_insights.com',
+        host='https://eu.i.posthog.com',
         debug=True,
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -502,11 +502,11 @@ def test_code_variables_too_long_string_in_nested_dict(tmpdir):
         dedent(
             """
     import os
-    from posthog import Posthog
+    from hanzo_insights import Posthog
 
     posthog = Posthog(
         'phc_x',
-        host='https://eu.i.hanzo_insights.com',
+        host='https://eu.i.posthog.com',
         debug=True,
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,

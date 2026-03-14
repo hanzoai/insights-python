@@ -8,7 +8,7 @@ from typing import Optional
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
-from posthog import utils
+from hanzo_insights import utils
 from hanzo_insights.types import FlagValue
 from hanzo_insights.utils import convert_to_datetime_aware, is_valid_regex
 

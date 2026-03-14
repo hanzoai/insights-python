@@ -1,5 +1,5 @@
 """
-Common type definitions for PostHog AI SDK.
+Common type definitions for Insights AI SDK.
 
 These types are used for formatting messages and responses across different AI providers
 (Anthropic, OpenAI, Gemini, etc.) to ensure consistency in tracking and data structure.
@@ -41,10 +41,10 @@ FormattedContentItem = Union[
 
 class FormattedMessage(TypedDict):
     """
-    Standardized message format for PostHog tracking.
+    Standardized message format for Insights tracking.
 
     Used across all providers to ensure consistent message structure
-    when sending events to PostHog.
+    when sending events to Insights.
     """
 
     role: str

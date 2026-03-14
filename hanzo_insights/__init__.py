@@ -76,11 +76,11 @@ def new_context(fresh=False, capture_exceptions=True, client=None):
     Args:
         fresh: Whether to start with a fresh context (default: False)
         capture_exceptions: Whether to capture exceptions raised within the context (default: True)
-        client: Optional Posthog client instance to use for this context (default: None)
+        client: Optional Insights client instance to use for this context (default: None)
 
     Examples:
         ```python
-        from posthog import new_context, tag, capture
+        from hanzo_insights import new_context, tag, capture
         with new_context():
             tag("request_id", "123")
             capture("event_name", properties={"property": "value"})
@@ -100,11 +100,11 @@ def scoped(fresh=False, capture_exceptions=True):
 
     Args:
         fresh: Whether to start with a fresh context (default: False)
-        capture_exceptions: Whether to capture and track exceptions with posthog error tracking (default: True)
+        capture_exceptions: Whether to capture and track exceptions with Insights error tracking (default: True)
 
     Examples:
         ```python
-        from posthog import scoped, tag, capture
+        from hanzo_insights import scoped, tag, capture
         @scoped()
         def process_payment(payment_id):
             tag("payment_id", payment_id)
@@ -126,7 +126,7 @@ def set_context_session(session_id: str):
 
     Examples:
         ```python
-        from posthog import set_context_session
+        from hanzo_insights import set_context_session
         set_context_session("session_123")
         ```
 
@@ -146,7 +146,7 @@ def set_context_device_id(device_id: str):
 
     Examples:
         ```python
-        from posthog import set_context_device_id
+        from hanzo_insights import set_context_device_id
         set_context_device_id("device_123")
         ```
 
@@ -165,7 +165,7 @@ def identify_context(distinct_id: str):
 
     Examples:
         ```python
-        from posthog import identify_context
+        from hanzo_insights import identify_context
         identify_context("user_123")
         ```
 
@@ -206,7 +206,7 @@ def tag(name: str, value: Any):
 
     Examples:
         ```python
-        from posthog import tag
+        from hanzo_insights import tag
         tag("user_id", "123")
         ```
 
@@ -280,12 +280,12 @@ def capture(event: str, **kwargs: Unpack[OptionalCaptureArgs]) -> Optional[str]:
             disable_geoip: Whether to disable GeoIP lookup
 
     Details:
-        Capture allows you to capture anything a user does within your system, which you can later use in PostHog to find patterns in usage, work out which features to improve or where people are giving up. A capture call requires an event name to specify the event. We recommend using [verb] [noun], like `movie played` or `movie updated` to easily identify what your events mean later on. Capture takes a number of optional arguments, which are defined by the `OptionalCaptureArgs` type.
+        Capture allows you to capture anything a user does within your system, which you can later use in Insights to find patterns in usage, work out which features to improve or where people are giving up. A capture call requires an event name to specify the event. We recommend using [verb] [noun], like `movie played` or `movie updated` to easily identify what your events mean later on. Capture takes a number of optional arguments, which are defined by the `OptionalCaptureArgs` type.
 
     Examples:
         ```python
         # Context and capture usage
-        from posthog import new_context, identify_context, tag_context, capture
+        from hanzo_insights import new_context, identify_context, tag_context, capture
         # Enter a new context (e.g. a request/response cycle, an instance of a background job, etc)
         with new_context():
             # Associate this context with some user, by distinct_id
@@ -312,7 +312,7 @@ def capture(event: str, **kwargs: Unpack[OptionalCaptureArgs]) -> Optional[str]:
         ```
         ```python
         # Set event properties
-        from posthog import capture
+        from hanzo_insights import capture
         capture(
             "user_signed_up",
             distinct_id="distinct_id_of_the_user",
@@ -339,7 +339,7 @@ def set(**kwargs: Unpack[OptionalSetArgs]) -> Optional[str]:
     Examples:
         ```python
         # Set person properties
-        from posthog import capture
+        from hanzo_insights import capture
         capture(
             'distinct_id',
             event='event_name',
@@ -366,7 +366,7 @@ def set_once(**kwargs: Unpack[OptionalSetArgs]) -> Optional[str]:
     Examples:
         ```python
         # Set property once
-        from posthog import capture
+        from hanzo_insights import capture
         capture(
             'distinct_id',
             event='event_name',
@@ -406,7 +406,7 @@ def group_identify(
     Examples:
         ```python
         # Group identify
-        from posthog import group_identify
+        from hanzo_insights import group_identify
         group_identify('company', 'company_id_in_your_db', {
             'name': 'Awesome Inc.',
             'employees': 11
@@ -451,7 +451,7 @@ def alias(
     Examples:
         ```python
         # Alias user
-        from posthog import alias
+        from hanzo_insights import alias
         alias(previous_id='distinct_id', distinct_id='alias_id')
         ```
     Category:
@@ -484,7 +484,7 @@ def capture_exception(
     Examples:
         ```python
         # Capture exception
-        from posthog import capture_exception
+        from hanzo_insights import capture_exception
         try:
             risky_operation()
         except Exception as e:
@@ -528,7 +528,7 @@ def feature_enabled(
     Examples:
         ```python
         # Boolean feature flag
-        from posthog import feature_enabled, get_feature_flag_payload
+        from hanzo_insights import feature_enabled, get_feature_flag_payload
         is_my_flag_enabled = feature_enabled('flag-key', 'distinct_id_of_your_user')
         if is_my_flag_enabled:
             matched_flag_payload = get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
@@ -575,12 +575,12 @@ def get_feature_flag(
         disable_geoip: Whether to disable GeoIP lookup
 
     Details:
-        `groups` are a mapping from group type to group key. So, if you have a group type of "organization" and a group key of "5", you would pass groups={"organization": "5"}. `group_properties` take the format: { group_type_name: { group_properties } }. So, for example, if you have the group type "organization" and the group key "5", with the properties name, and employee count, you'll send these as: group_properties={"organization": {"name": "PostHog", "employees": 11}}.
+        `groups` are a mapping from group type to group key. So, if you have a group type of "organization" and a group key of "5", you would pass groups={"organization": "5"}. `group_properties` take the format: { group_type_name: { group_properties } }. So, for example, if you have the group type "organization" and the group key "5", with the properties name, and employee count, you'll send these as: group_properties={"organization": {"name": "Hanzo", "employees": 11}}.
 
     Examples:
         ```python
         # Multivariate feature flag
-        from posthog import get_feature_flag, get_feature_flag_payload
+        from hanzo_insights import get_feature_flag, get_feature_flag_payload
         enabled_variant = get_feature_flag('flag-key', 'distinct_id_of_your_user')
         if enabled_variant == 'variant-key':
             matched_flag_payload = get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
@@ -628,7 +628,7 @@ def get_all_flags(
     Examples:
         ```python
         # All flags for user
-        from posthog import get_all_flags
+        from hanzo_insights import get_all_flags
         get_all_flags('distinct_id_of_your_user')
         ```
     Category:
@@ -768,7 +768,7 @@ def feature_flag_definitions():
 
     Examples:
         ```python
-        from posthog import feature_flag_definitions
+        from hanzo_insights import feature_flag_definitions
         definitions = feature_flag_definitions()
         ```
 
@@ -780,11 +780,11 @@ def feature_flag_definitions():
 
 def load_feature_flags():
     """
-    Load feature flag definitions from PostHog.
+    Load feature flag definitions from the server.
 
     Examples:
         ```python
-        from posthog import load_feature_flags
+        from hanzo_insights import load_feature_flags
         load_feature_flags()
         ```
 
@@ -800,7 +800,7 @@ def flush():
 
     Examples:
         ```python
-        from posthog import flush
+        from hanzo_insights import flush
         flush()
         ```
 
@@ -816,7 +816,7 @@ def join():
 
     Examples:
         ```python
-        from posthog import join
+        from hanzo_insights import join
         join()
         ```
 
@@ -832,7 +832,7 @@ def shutdown():
 
     Examples:
         ```python
-        from posthog import shutdown
+        from hanzo_insights import shutdown
         shutdown()
         ```
 
@@ -888,5 +888,11 @@ def _proxy(method, *args, **kwargs):
     return fn(*args, **kwargs)
 
 
-class Posthog(Client):
+class Insights(Client):
+    """Hanzo Insights client for product analytics."""
+
     pass
+
+
+# Backward compatibility alias
+Posthog = Insights

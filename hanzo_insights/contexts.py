@@ -159,7 +159,7 @@ def new_context(
     Category:
         Contexts
     """
-    from posthog import capture_exception
+    from hanzo_insights import capture_exception
 
     current_context = _get_current_context()
     new_context = ContextScope(current_context, fresh, capture_exceptions, client)
@@ -244,7 +244,7 @@ def set_context_session(session_id: str) -> None:
     Entering a fresh context will clear the context-level session ID.
 
     Args:
-        session_id: The session ID to associate with the current context and its children. See https://hanzo_insights.com/docs/data/sessions
+        session_id: The session ID to associate with the current context and its children. See https://insights.hanzo.ai/docs/data/sessions
 
     Category:
         Contexts
@@ -377,7 +377,7 @@ def scoped(fresh: bool = False, capture_exceptions: bool = True):
 
     Args:
         fresh: Whether to start with a fresh context (default: False)
-        capture_exceptions: Whether to capture and track exceptions with posthog error tracking (default: True)
+        capture_exceptions: Whether to capture and track exceptions with Insights error tracking (default: True)
 
     Example:
         @hanzo_insights.scoped()

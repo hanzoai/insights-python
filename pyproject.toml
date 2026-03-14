@@ -91,6 +91,7 @@ packages = [
     "hanzo_insights.test.ai",
     "hanzo_insights.test.ai.openai_agents",
     "hanzo_insights.integrations",
+    "insights",
 ]
 
 [tool.pytest.ini_options]

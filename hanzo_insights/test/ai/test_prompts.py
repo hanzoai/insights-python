@@ -36,7 +36,7 @@ class TestPrompts(unittest.TestCase):
         self,
         personal_api_key="phx_test_key",
         project_api_key="phc_test_key",
-        host="https://us.hanzo_insights.com",
+        host="https://us.posthog.com",
     ):
         """Create a mock PostHog client."""
         mock = MagicMock()
@@ -65,7 +65,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.hanzo_insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key",
+            "https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key",
         )
         self.assertIn("Authorization", call_args[1]["headers"])
         self.assertEqual(
@@ -93,7 +93,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.hanzo_insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key&version=1",
+            "https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key&version=1",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
@@ -347,7 +347,7 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
 
-        posthog = self.create_mock_posthog(host="https://eu.hanzo_insights.com")
+        posthog = self.create_mock_posthog(host="https://eu.posthog.com")
         prompts = Prompts(posthog)
 
         prompts.get("test-prompt")
@@ -355,9 +355,9 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertTrue(
             call_args[0][0].startswith(
-                "https://eu.hanzo_insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key"
+                "https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key"
             ),
-            f"Expected URL to start with 'https://eu.hanzo_insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key', got {call_args[0][0]}",
+            f"Expected URL to start with 'https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key', got {call_args[0][0]}",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
@@ -427,7 +427,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.hanzo_insights.com/api/environments/@current/llm_prompts/name/prompt%20with%20spaces%2Fand%2Fslashes/?token=phc_test_key",
+            "https://us.posthog.com/api/environments/@current/llm_prompts/name/prompt%20with%20spaces%2Fand%2Fslashes/?token=phc_test_key",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
@@ -446,7 +446,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.hanzo_insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
+            "https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
         )
         self.assertEqual(
             call_args[1]["headers"]["Authorization"], "Bearer phx_direct_key"
@@ -461,7 +461,7 @@ class TestPromptsGet(TestPrompts):
         prompts = Prompts(
             personal_api_key="phx_direct_key",
             project_api_key="phc_direct_key",
-            host="https://eu.hanzo_insights.com",
+            host="https://eu.posthog.com",
         )
 
         prompts.get("test-prompt")
@@ -469,7 +469,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://eu.hanzo_insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
+            "https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")

@@ -11,7 +11,7 @@ except ImportError:
         "Please install the OpenAI SDK to use this feature: 'pip install openai'"
     )
 
-from posthog import setup
+from hanzo_insights import setup
 from hanzo_insights.ai.utils import (
     call_llm_and_track_usage_async,
     extract_available_tool_calls,
@@ -27,17 +27,17 @@ from hanzo_insights.ai.openai.openai_converter import (
     format_openai_streaming_output,
 )
 from hanzo_insights.ai.sanitization import sanitize_openai, sanitize_openai_response
-from hanzo_insights.client import Client as PostHogClient
+from hanzo_insights.client import Client as InsightsClient
 
 
 class AsyncOpenAI(openai.AsyncOpenAI):
     """
-    An async wrapper around the OpenAI SDK that automatically sends LLM usage events to PostHog.
+    An async wrapper around the OpenAI SDK that automatically sends LLM usage events to Insights.
     """
 
-    _ph_client: PostHogClient
+    _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[PostHogClient] = None, **kwargs):
+    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: OpenAI API key.
@@ -70,7 +70,7 @@ class AsyncOpenAI(openai.AsyncOpenAI):
 
 
 class WrappedResponses:
-    """Async wrapper for OpenAI responses that tracks usage in PostHog."""
+    """Async wrapper for OpenAI responses that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_responses):
         self._client = client
@@ -260,7 +260,7 @@ class WrappedResponses:
         **kwargs: Any,
     ):
         """
-        Parse structured output using OpenAI's 'responses.parse' method, but also track usage in PostHog.
+        Parse structured output using OpenAI's 'responses.parse' method, but also track usage in Insights.
 
         Args:
             posthog_distinct_id: Optional ID to associate with the usage event.
@@ -288,7 +288,7 @@ class WrappedResponses:
 
 
 class WrappedChat:
-    """Async wrapper for OpenAI chat that tracks usage in PostHog."""
+    """Async wrapper for OpenAI chat that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_chat):
         self._client = client
@@ -304,7 +304,7 @@ class WrappedChat:
 
 
 class WrappedCompletions:
-    """Async wrapper for OpenAI chat completions that tracks usage in PostHog."""
+    """Async wrapper for OpenAI chat completions that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_completions):
         self._client = client
@@ -504,7 +504,7 @@ class WrappedCompletions:
 
 
 class WrappedEmbeddings:
-    """Async wrapper for OpenAI embeddings that tracks usage in PostHog."""
+    """Async wrapper for OpenAI embeddings that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_embeddings):
         self._client = client
@@ -525,7 +525,7 @@ class WrappedEmbeddings:
         **kwargs: Any,
     ):
         """
-        Create an embedding using OpenAI's 'embeddings.create' method, but also track usage in PostHog.
+        Create an embedding using OpenAI's 'embeddings.create' method, but also track usage in Insights.
 
         Args:
             posthog_distinct_id: Optional ID to associate with the usage event.
@@ -590,7 +590,7 @@ class WrappedEmbeddings:
 
 
 class WrappedBeta:
-    """Async wrapper for OpenAI beta features that tracks usage in PostHog."""
+    """Async wrapper for OpenAI beta features that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_beta):
         self._client = client
@@ -607,7 +607,7 @@ class WrappedBeta:
 
 
 class WrappedBetaChat:
-    """Async wrapper for OpenAI beta chat that tracks usage in PostHog."""
+    """Async wrapper for OpenAI beta chat that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_beta_chat):
         self._client = client
@@ -624,7 +624,7 @@ class WrappedBetaChat:
 
 
 class WrappedBetaCompletions:
-    """Async wrapper for OpenAI beta chat completions that tracks usage in PostHog."""
+    """Async wrapper for OpenAI beta chat completions that tracks usage in Insights."""
 
     def __init__(self, client: AsyncOpenAI, original_beta_completions):
         self._client = client

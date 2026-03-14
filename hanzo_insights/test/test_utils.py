@@ -13,7 +13,7 @@ from parameterized import parameterized
 from pydantic import BaseModel
 from pydantic.v1 import BaseModel as BaseModelV1
 
-from posthog import utils
+from hanzo_insights import utils
 from hanzo_insights.types import FeatureFlagResult
 
 TEST_API_KEY = "kOOlRy2QlMY9jHZQv0bKz0FZyazBUoY8Arj0lFVNjs4"

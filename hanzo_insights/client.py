@@ -149,15 +149,15 @@ def no_throw(default_return=None):
 
 class Client(object):
     """
-    This is the SDK reference for the PostHog Python SDK.
+    This is the SDK reference for the Hanzo Insights Python SDK.
     You can learn more about example usage in the [Python SDK documentation](/docs/libraries/python).
     You can also follow [Flask](/docs/libraries/flask) and [Django](/docs/libraries/django)
-    guides to integrate PostHog into your project.
+    guides to integrate Insights into your project.
 
     Examples:
         ```python
-        from posthog import Posthog
-        posthog = Posthog('<ph_project_api_key>', host='<ph_client_api_host>')
+        from hanzo_insights import Insights
+        client = Insights('<ph_project_api_key>', host='<ph_client_api_host>')
         hanzo_insights.debug = True
         if settings.TEST:
             hanzo_insights.disabled = True
@@ -202,7 +202,7 @@ class Client(object):
         in_app_modules: list[str] | None = None,
     ):
         """
-        Initialize a new PostHog client instance.
+        Initialize a new Insights client instance.
 
         Args:
             project_api_key: The project API key.
@@ -211,9 +211,9 @@ class Client(object):
 
         Examples:
             ```python
-            from posthog import Posthog
+            from hanzo_insights import Insights
 
-            posthog = Posthog('<ph_project_api_key>', host='<ph_app_host>')
+            client = Insights('<ph_project_api_key>', host='<ph_app_host>')
             ```
 
         Category:
@@ -570,7 +570,7 @@ class Client(object):
         self, event: str, **kwargs: Unpack[OptionalCaptureArgs]
     ) -> Optional[str]:
         """
-        Captures an event manually. [Learn about capture best practices](https://hanzo_insights.com/docs/product-analytics/capture-events)
+        Captures an event manually. [Learn about capture best practices](https://insights.hanzo.ai/docs/product-analytics/capture-events)
 
         Args:
             event: The event name to capture.
@@ -589,7 +589,7 @@ class Client(object):
             ```
             ```python
             # Context usage
-            from posthog import identify_context, new_context
+            from hanzo_insights import identify_context, new_context
             with new_context():
                 identify_context('distinct_id_of_the_user')
                 hanzo_insights.capture('user_signed_up')
@@ -1285,7 +1285,7 @@ class Client(object):
             self._fetch_feature_flags_from_api()
 
     def _fetch_feature_flags_from_api(self):
-        """Fetch feature flags from the PostHog API."""
+        """Fetch feature flags from the Insights API."""
         try:
             # Store old flags to detect changes
             old_flags_by_key: dict[str, dict] = self.feature_flags_by_key or {}
@@ -1334,7 +1334,7 @@ class Client(object):
         except APIError as e:
             if e.status == 401:
                 self.log.error(
-                    "[FEATURE FLAGS] Error loading feature flags: To use feature flags, please set a valid personal_api_key. More information: https://hanzo_insights.com/docs/api/overview"
+                    "[FEATURE FLAGS] Error loading feature flags: To use feature flags, please set a valid personal_api_key. More information: https://insights.hanzo.ai/docs/api/overview"
                 )
                 self.feature_flags = []
                 self.group_type_mapping = {}
@@ -1348,11 +1348,11 @@ class Client(object):
                         status=401,
                         message="You are using a write-only key with feature flags. "
                         "To use feature flags, please set a personal_api_key "
-                        "More information: https://hanzo_insights.com/docs/api/overview",
+                        "More information: https://insights.hanzo.ai/docs/api/overview",
                     )
             elif e.status == 402:
                 self.log.warning(
-                    "[FEATURE FLAGS] PostHog feature flags quota limited, resetting feature flag data.  Learn more about billing limits at https://hanzo_insights.com/docs/billing/limits-alerts"
+                    "[FEATURE FLAGS] Insights feature flags quota limited, resetting feature flag data.  Learn more about billing limits at https://insights.hanzo.ai/docs/billing/limits-alerts"
                 )
                 # Reset all feature flag data when quota limited
                 self.feature_flags = []
@@ -1366,7 +1366,7 @@ class Client(object):
                 if self.debug:
                     raise APIError(
                         status=402,
-                        message="PostHog feature flags quota limited",
+                        message="Insights feature flags quota limited",
                     )
             else:
                 self.log.error(f"[FEATURE FLAGS] Error loading feature flags: {e}")
@@ -2231,7 +2231,7 @@ class Client(object):
         """Initialize feature flag cache for graceful degradation during service outages.
 
         When enabled, the cache stores flag evaluation results and serves them as fallback
-        when the PostHog API is unavailable. This ensures your application continues to
+        when the Insights API is unavailable. This ensures your application continues to
         receive flag values even during outages.
 
         Args:

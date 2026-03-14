@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING, cast
-from posthog import contexts
+from hanzo_insights import contexts
 from hanzo_insights.client import Client
 
 try:
@@ -21,25 +21,26 @@ if TYPE_CHECKING:
     from typing import Callable, Dict, Any, Optional, Union, Awaitable  # noqa: F401
 
 
-class PosthogContextMiddleware:
+class InsightsContextMiddleware:
     """Middleware to automatically track Django requests.
 
-    This middleware wraps all calls with a posthog context. It attempts to extract the following from the request headers:
-    - Session ID, (extracted from `X-POSTHOG-SESSION-ID`)
-    - Distinct ID, (extracted from `X-POSTHOG-DISTINCT-ID`)
+    This middleware wraps all calls with an Insights context. It attempts to extract the following from the request headers:
+    - Session ID, (extracted from `X-INSIGHTS-SESSION-ID` or `X-POSTHOG-SESSION-ID`)
+    - Distinct ID, (extracted from `X-INSIGHTS-DISTINCT-ID` or `X-POSTHOG-DISTINCT-ID`)
     - Request URL as $current_url
     - Request Method as $request_method
 
-    The context will also auto-capture exceptions and send them to PostHog, unless you disable it by setting
-    `POSTHOG_MW_CAPTURE_EXCEPTIONS` to `False` in your Django settings. The exceptions are captured using the
-    global client, unless the setting `POSTHOG_MW_CLIENT` is set to a custom client instance
+    The context will also auto-capture exceptions and send them to Insights, unless you disable it by setting
+    `INSIGHTS_MW_CAPTURE_EXCEPTIONS` (or `POSTHOG_MW_CAPTURE_EXCEPTIONS`) to `False` in your Django settings.
+    The exceptions are captured using the global client, unless the setting `INSIGHTS_MW_CLIENT`
+    (or `POSTHOG_MW_CLIENT`) is set to a custom client instance.
 
     The middleware behaviour is customisable through 3 additional functions:
-    - `POSTHOG_MW_EXTRA_TAGS`, which is a Callable[[HttpRequest], Dict[str, Any]] expected to return a dictionary of additional tags to be added to the context.
-    - `POSTHOG_MW_REQUEST_FILTER`, which is a Callable[[HttpRequest], bool] expected to return `False` if the request should not be tracked.
-    - `POSTHOG_MW_TAG_MAP`, which is a Callable[[Dict[str, Any]], Dict[str, Any]], which you can use to modify the tags before they're added to the context.
+    - `INSIGHTS_MW_EXTRA_TAGS` (or `POSTHOG_MW_EXTRA_TAGS`), which is a Callable[[HttpRequest], Dict[str, Any]] expected to return a dictionary of additional tags to be added to the context.
+    - `INSIGHTS_MW_REQUEST_FILTER` (or `POSTHOG_MW_REQUEST_FILTER`), which is a Callable[[HttpRequest], bool] expected to return `False` if the request should not be tracked.
+    - `INSIGHTS_MW_TAG_MAP` (or `POSTHOG_MW_TAG_MAP`), which is a Callable[[Dict[str, Any]], Dict[str, Any]], which you can use to modify the tags before they're added to the context.
 
-    You can use the `POSTHOG_MW_TAG_MAP` function to remove any default tags you don't want to capture, or override them with your own values.
+    You can use the `INSIGHTS_MW_TAG_MAP` function to remove any default tags you don't want to capture, or override them with your own values.
 
     Context tags are automatically included as properties on all events captured within a context, including exceptions.
     See the context documentation for more information. The extracted distinct ID and session ID, if found, are used to
@@ -66,47 +67,52 @@ class PosthogContextMiddleware:
 
         from django.conf import settings
 
-        if hasattr(settings, "POSTHOG_MW_EXTRA_TAGS") and callable(
-            settings.POSTHOG_MW_EXTRA_TAGS
-        ):
+        # Support both INSIGHTS_MW_* and legacy POSTHOG_MW_* setting names
+        def _get_setting(name):
+            insights_name = f"INSIGHTS_MW_{name}"
+            posthog_name = f"POSTHOG_MW_{name}"
+            if hasattr(settings, insights_name):
+                return getattr(settings, insights_name)
+            if hasattr(settings, posthog_name):
+                return getattr(settings, posthog_name)
+            return None
+
+        extra_tags = _get_setting("EXTRA_TAGS")
+        if extra_tags and callable(extra_tags):
             self.extra_tags = cast(
                 "Optional[Callable[[HttpRequest], Dict[str, Any]]]",
-                settings.POSTHOG_MW_EXTRA_TAGS,
+                extra_tags,
             )
         else:
             self.extra_tags = None
 
-        if hasattr(settings, "POSTHOG_MW_REQUEST_FILTER") and callable(
-            settings.POSTHOG_MW_REQUEST_FILTER
-        ):
+        request_filter = _get_setting("REQUEST_FILTER")
+        if request_filter and callable(request_filter):
             self.request_filter = cast(
                 "Optional[Callable[[HttpRequest], bool]]",
-                settings.POSTHOG_MW_REQUEST_FILTER,
+                request_filter,
             )
         else:
             self.request_filter = None
 
-        if hasattr(settings, "POSTHOG_MW_TAG_MAP") and callable(
-            settings.POSTHOG_MW_TAG_MAP
-        ):
+        tag_map = _get_setting("TAG_MAP")
+        if tag_map and callable(tag_map):
             self.tag_map = cast(
                 "Optional[Callable[[Dict[str, Any]], Dict[str, Any]]]",
-                settings.POSTHOG_MW_TAG_MAP,
+                tag_map,
             )
         else:
             self.tag_map = None
 
-        if hasattr(settings, "POSTHOG_MW_CAPTURE_EXCEPTIONS") and isinstance(
-            settings.POSTHOG_MW_CAPTURE_EXCEPTIONS, bool
-        ):
-            self.capture_exceptions = settings.POSTHOG_MW_CAPTURE_EXCEPTIONS
+        capture_exceptions = _get_setting("CAPTURE_EXCEPTIONS")
+        if isinstance(capture_exceptions, bool):
+            self.capture_exceptions = capture_exceptions
         else:
             self.capture_exceptions = True
 
-        if hasattr(settings, "POSTHOG_MW_CLIENT") and isinstance(
-            settings.POSTHOG_MW_CLIENT, Client
-        ):
-            self.client = cast("Optional[Client]", settings.POSTHOG_MW_CLIENT)
+        mw_client = _get_setting("CLIENT")
+        if isinstance(mw_client, Client):
+            self.client = cast("Optional[Client]", mw_client)
         else:
             self.client = None
 
@@ -125,13 +131,13 @@ class PosthogContextMiddleware:
         """
         tags = {}
 
-        # Extract session ID from X-POSTHOG-SESSION-ID header
-        session_id = request.headers.get("X-POSTHOG-SESSION-ID")
+        # Extract session ID from X-INSIGHTS-SESSION-ID or X-POSTHOG-SESSION-ID header
+        session_id = request.headers.get("X-INSIGHTS-SESSION-ID") or request.headers.get("X-POSTHOG-SESSION-ID")
         if session_id:
             contexts.set_context_session(session_id)
 
-        # Extract distinct ID from X-POSTHOG-DISTINCT-ID header or request user id
-        distinct_id = request.headers.get("X-POSTHOG-DISTINCT-ID") or user_id
+        # Extract distinct ID from X-INSIGHTS-DISTINCT-ID or X-POSTHOG-DISTINCT-ID header or request user id
+        distinct_id = request.headers.get("X-INSIGHTS-DISTINCT-ID") or request.headers.get("X-POSTHOG-DISTINCT-ID") or user_id
         if distinct_id:
             contexts.identify_context(distinct_id)
 
@@ -314,6 +320,10 @@ class PosthogContextMiddleware:
         if self.client:
             self.client.capture_exception(exception)
         else:
-            from posthog import capture_exception
+            from hanzo_insights import capture_exception
 
             capture_exception(exception)
+
+
+# Backward compatibility alias
+PosthogContextMiddleware = InsightsContextMiddleware

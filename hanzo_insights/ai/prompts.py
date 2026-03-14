@@ -1,7 +1,7 @@
 """
-Prompt management for PostHog AI SDK.
+Prompt management for Hanzo Insights AI SDK.
 
-Fetch and compile LLM prompts from PostHog with caching and fallback support.
+Fetch and compile LLM prompts from Insights with caching and fallback support.
 """
 
 import logging
@@ -15,7 +15,7 @@ from hanzo_insights.utils import remove_trailing_slash
 
 log = logging.getLogger("hanzo_insights")
 
-APP_ENDPOINT = "https://us.hanzo_insights.com"
+APP_ENDPOINT = "https://us.posthog.com"
 DEFAULT_CACHE_TTL_SECONDS = 300  # 5 minutes
 
 PromptVariables = Dict[str, Union[str, int, float, bool]]
@@ -54,24 +54,24 @@ def _is_prompt_api_response(data: Any) -> bool:
 
 class Prompts:
     """
-    Fetch and compile LLM prompts from PostHog.
+    Fetch and compile LLM prompts from Insights.
 
-    Can be initialized with a PostHog client or with direct options.
+    Can be initialized with a Insights client or with direct options.
 
     Examples:
         ```python
-        from posthog import Posthog
+        from hanzo_insights import Insights
         from hanzo_insights.ai.prompts import Prompts
 
-        # With PostHog client
-        posthog = Posthog('phc_xxx', host='https://us.hanzo_insights.com', personal_api_key='phx_xxx')
-        prompts = Prompts(posthog)
+        # With Insights client
+        client = Insights('phc_xxx', host='https://us.posthog.com', personal_api_key='phx_xxx')
+        prompts = Prompts(client)
 
-        # Or with direct options (no PostHog client needed)
+        # Or with direct options (no Insights client needed)
         prompts = Prompts(
             personal_api_key='phx_xxx',
             project_api_key='phc_xxx',
-            host='https://us.hanzo_insights.com',
+            host='https://us.posthog.com',
         )
 
         # Fetch with caching and fallback
@@ -101,10 +101,10 @@ class Prompts:
         Initialize Prompts.
 
         Args:
-            posthog: PostHog client instance (optional if personal_api_key provided)
+            posthog: Insights client instance (optional if personal_api_key provided)
             personal_api_key: Direct personal API key (optional if posthog provided)
             project_api_key: Direct project API key (optional if posthog provided)
-            host: PostHog host (defaults to app endpoint)
+            host: Insights host (defaults to app endpoint)
             default_cache_ttl_seconds: Default cache TTL (defaults to 300)
         """
         self._default_cache_ttl_seconds = (
@@ -132,7 +132,7 @@ class Prompts:
         version: Optional[int] = None,
     ) -> str:
         """
-        Fetch a prompt by name from the PostHog API.
+        Fetch a prompt by name from the Insights API.
 
         Caching behavior:
         1. If cache is fresh, return cached value
@@ -186,7 +186,7 @@ class Prompts:
             # 1. Return stale cache (with warning)
             if cached is not None:
                 log.warning(
-                    "[PostHog Prompts] Failed to fetch %s, using stale cache: %s",
+                    "[Insights Prompts] Failed to fetch %s, using stale cache: %s",
                     prompt_reference,
                     error,
                 )
@@ -195,7 +195,7 @@ class Prompts:
             # 2. Return fallback (with warning)
             if fallback is not None:
                 log.warning(
-                    "[PostHog Prompts] Failed to fetch %s, using fallback: %s",
+                    "[Insights Prompts] Failed to fetch %s, using fallback: %s",
                     prompt_reference,
                     error,
                 )
@@ -256,7 +256,7 @@ class Prompts:
 
     def _fetch_prompt_from_api(self, name: str, version: Optional[int] = None) -> str:
         """
-        Fetch prompt from PostHog API.
+        Fetch prompt from Insights API.
 
         Endpoint:
             {host}/api/environments/@current/llm_prompts/name/{encoded_name}/
@@ -275,12 +275,12 @@ class Prompts:
         """
         if not self._personal_api_key:
             raise Exception(
-                "[PostHog Prompts] personal_api_key is required to fetch prompts. "
+                "[Insights Prompts] personal_api_key is required to fetch prompts. "
                 "Please provide it when initializing the Prompts instance."
             )
         if not self._project_api_key:
             raise Exception(
-                "[PostHog Prompts] project_api_key is required to fetch prompts. "
+                "[Insights Prompts] project_api_key is required to fetch prompts. "
                 "Please provide it when initializing the Prompts instance."
             )
 
@@ -302,28 +302,28 @@ class Prompts:
 
         if not response.ok:
             if response.status_code == 404:
-                raise Exception(f"[PostHog Prompts] {prompt_label} not found")
+                raise Exception(f"[Insights Prompts] {prompt_label} not found")
 
             if response.status_code == 403:
                 raise Exception(
-                    f"[PostHog Prompts] Access denied for {prompt_reference}. "
+                    f"[Insights Prompts] Access denied for {prompt_reference}. "
                     "Check that your personal_api_key has the correct permissions and the LLM prompts feature is enabled."
                 )
 
             raise Exception(
-                f"[PostHog Prompts] Failed to fetch {prompt_label}: HTTP {response.status_code}"
+                f"[Insights Prompts] Failed to fetch {prompt_label}: HTTP {response.status_code}"
             )
 
         try:
             data = response.json()
         except Exception:
             raise Exception(
-                f"[PostHog Prompts] Invalid response format for {prompt_label}"
+                f"[Insights Prompts] Invalid response format for {prompt_label}"
             )
 
         if not _is_prompt_api_response(data):
             raise Exception(
-                f"[PostHog Prompts] Invalid response format for {prompt_label}"
+                f"[Insights Prompts] Invalid response format for {prompt_label}"
             )
 
         return data["prompt"]
