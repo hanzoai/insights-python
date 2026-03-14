@@ -5,10 +5,10 @@ from hanzo_insights.ai.utils import _get_tokens_source
 
 @parameterized.expand(
     [
-        ("no_posthog_properties", {"$ai_input_tokens": 100}, None, "sdk"),
-        ("empty_posthog_properties", {"$ai_input_tokens": 100}, {}, "sdk"),
+        ("no_insights_properties", {"$ai_input_tokens": 100}, None, "sdk"),
+        ("empty_insights_properties", {"$ai_input_tokens": 100}, {}, "sdk"),
         (
-            "unrelated_posthog_properties",
+            "unrelated_insights_properties",
             {"$ai_input_tokens": 100},
             {"foo": "bar"},
             "sdk",
@@ -57,6 +57,6 @@ from hanzo_insights.ai.utils import _get_tokens_source
         ),
     ]
 )
-def test_get_tokens_source(name, sdk_tags, posthog_properties, expected):
-    result = _get_tokens_source(sdk_tags, posthog_properties)
+def test_get_tokens_source(name, sdk_tags, insights_properties, expected):
+    result = _get_tokens_source(sdk_tags, insights_properties)
     assert result == expected

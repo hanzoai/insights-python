@@ -62,8 +62,8 @@ DEFAULT_CODE_VARIABLES_MASK_PATTERNS = [
 
 DEFAULT_CODE_VARIABLES_IGNORE_PATTERNS = [r"^__.*"]
 
-CODE_VARIABLES_REDACTED_VALUE = "$$_posthog_redacted_based_on_masking_rules_$$"
-CODE_VARIABLES_TOO_LONG_VALUE = "$$_posthog_value_too_long_$$"
+CODE_VARIABLES_REDACTED_VALUE = "$$_insights_redacted_based_on_masking_rules_$$"
+CODE_VARIABLES_TOO_LONG_VALUE = "$$_insights_value_too_long_$$"
 
 _MAX_VALUE_LENGTH_FOR_PATTERN_MATCH = 5_000
 _MAX_COLLECTION_ITEMS_TO_SCAN = 100
@@ -768,12 +768,12 @@ def set_in_app_in_frames(frames, in_app_exclude, in_app_include, project_root=No
 def exception_is_already_captured(error):
     # type: (ExceptionArg) -> bool
     if isinstance(error, BaseException):
-        return hasattr(error, "__posthog_exception_captured")
+        return hasattr(error, "__insights_exception_captured")
     # Autocaptured exceptions are passed as a tuple from our system hooks,
     # the second item is the exception value (the first is the exception type)
     elif isinstance(error, tuple) and len(error) > 1:
         return error[1] is not None and hasattr(
-            error[1], "__posthog_exception_captured"
+            error[1], "__insights_exception_captured"
         )
     else:
         return False  # type: ignore[unreachable]
@@ -782,14 +782,14 @@ def exception_is_already_captured(error):
 def mark_exception_as_captured(error, uuid):
     # type: (ExceptionArg, str) -> None
     if isinstance(error, BaseException):
-        setattr(error, "__posthog_exception_captured", True)
-        setattr(error, "__posthog_exception_uuid", uuid)
+        setattr(error, "__insights_exception_captured", True)
+        setattr(error, "__insights_exception_uuid", uuid)
     # Autocaptured exceptions are passed as a tuple from our system hooks,
     # the second item is the exception value (the first is the exception type)
     elif isinstance(error, tuple) and len(error) > 1:
         if error[1] is not None:
-            setattr(error[1], "__posthog_exception_captured", True)
-            setattr(error[1], "__posthog_exception_uuid", uuid)
+            setattr(error[1], "__insights_exception_captured", True)
+            setattr(error[1], "__insights_exception_uuid", uuid)
 
 
 def exc_info_from_error(error):

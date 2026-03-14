@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate comprehensive SDK documentation JSON from PostHog Python SDK.
+Generate comprehensive SDK documentation JSON from Insights Python SDK.
 This script inspects the code and docstrings to create documentation in the specified format.
 """
 
@@ -337,8 +337,8 @@ def analyze_type(cls) -> dict:
 def generate_sdk_documentation():
     """Generate complete SDK documentation in the requested format."""
 
-    # Import PostHog components
-    import posthog
+    # Import Insights components
+    import hanzo_insights
     from hanzo_insights.client import Client
     import hanzo_insights.types as types_module
     import hanzo_insights.args as args_module
@@ -347,9 +347,9 @@ def generate_sdk_documentation():
     # Main SDK info
     sdk_info = {
         "version": VERSION,
-        "id": "posthog-python",
-        "title": "PostHog Python SDK",
-        "description": "Integrate PostHog into any python application.",
+        "id": "insights-python",
+        "title": "Insights Python SDK",
+        "description": "Integrate Insights into any python application.",
         "slugPrefix": DOCUMENTATION_METADATA["slugPrefix"],
         "specUrl": DOCUMENTATION_METADATA["specUrl"],
     }
@@ -388,24 +388,24 @@ def generate_sdk_documentation():
     # Collect classes
     classes_list = []
 
-    # Main PostHog class (renamed from Client)
+    # Main Insights class (renamed from Client)
     client_class = analyze_class(Client)
-    client_class["id"] = "PostHog"
-    client_class["title"] = "PostHog"
+    client_class["id"] = "Insights"
+    client_class["title"] = "Insights"
     classes_list.append(client_class)
 
     # Global module functions (functions callable as hanzo_insights.function_name)
     global_functions = []
-    for func_name in dir(posthog):
+    for func_name in dir(hanzo_insights):
         # Skip private functions and non-callables
-        if func_name.startswith("_") or not callable(getattr(posthog, func_name)):
+        if func_name.startswith("_") or not callable(getattr(hanzo_insights, func_name)):
             continue
 
-        func = getattr(posthog, func_name)
-        # Only include functions actually defined in the posthog module (not imported)
+        func = getattr(hanzo_insights, func_name)
+        # Only include functions actually defined in the hanzo_insights module (not imported)
         # and exclude class references
         if (
-            func_name not in ["Client", "Posthog"]
+            func_name not in ["Client", "Insights"]
             and hasattr(func, "__module__")
             and func.__module__ == "hanzo_insights"
         ):
@@ -421,8 +421,8 @@ def generate_sdk_documentation():
         classes_list.append(
             {
                 "id": "PostHogModule",
-                "title": "PostHog Module Functions",
-                "description": "Global functions available in the PostHog module",
+                "title": "Insights Module Functions",
+                "description": "Global functions available in the Insights module",
                 "functions": global_functions,
             }
         )
@@ -443,7 +443,7 @@ def generate_sdk_documentation():
 
     # Create the final structure
     result = {
-        "id": "posthog-python",
+        "id": "insights-python",
         "hogRef": DOCUMENTATION_METADATA["hogRef"],
         "info": sdk_info,
         "types": types_list,
@@ -455,7 +455,7 @@ def generate_sdk_documentation():
 
 
 if __name__ == "__main__":
-    print("Generating PostHog Python SDK documentation...")
+    print("Generating Insights Python SDK documentation...")
 
     try:
         documentation = generate_sdk_documentation()

@@ -104,7 +104,7 @@ class ContextScope:
 
 
 _context_stack: contextvars.ContextVar[Optional[ContextScope]] = contextvars.ContextVar(
-    "posthog_context_stack", default=None
+    "insights_context_stack", default=None
 )
 
 

@@ -467,12 +467,12 @@ def test_basic_completion(mock_client, mock_openai_response):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_openai_response
@@ -513,12 +513,12 @@ def test_embeddings(mock_client, mock_embedding_response):
         "openai.resources.embeddings.Embeddings.create",
         return_value=mock_embedding_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.embeddings.create(
             model="text-embedding-3-small",
             input="Hello world",
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_embedding_response
@@ -543,12 +543,12 @@ def test_groups(mock_client, mock_openai_response):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_groups={"company": "test_company"},
+            insights_distinct_id="test-id",
+            insights_groups={"company": "test_company"},
         )
 
         assert response == mock_openai_response
@@ -564,12 +564,12 @@ def test_privacy_mode_local(mock_client, mock_openai_response):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_privacy_mode=True,
+            insights_distinct_id="test-id",
+            insights_privacy_mode=True,
         )
 
         assert response == mock_openai_response
@@ -587,12 +587,12 @@ def test_privacy_mode_global(mock_client, mock_openai_response):
         return_value=mock_openai_response,
     ):
         mock_client.privacy_mode = True
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_privacy_mode=False,
+            insights_distinct_id="test-id",
+            insights_privacy_mode=False,
         )
 
         assert response == mock_openai_response
@@ -609,7 +609,7 @@ def test_error(mock_client, mock_openai_response):
         "openai.resources.chat.completions.Completions.create",
         side_effect=Exception("Test error"),
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         with pytest.raises(Exception):
             client.chat.completions.create(
                 model="gpt-4", messages=[{"role": "user", "content": "Hello"}]
@@ -628,12 +628,12 @@ def test_cached_tokens(mock_client, mock_openai_response_with_cached_tokens):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response_with_cached_tokens,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_openai_response_with_cached_tokens
@@ -666,7 +666,7 @@ def test_tool_calls(mock_client, mock_openai_response_with_tool_calls):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response_with_tool_calls,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -682,7 +682,7 @@ def test_tool_calls(mock_client, mock_openai_response_with_tool_calls):
                     },
                 }
             ],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_openai_response_with_tool_calls
@@ -739,7 +739,7 @@ def test_tool_calls_only_no_content(mock_client, mock_openai_response_tool_calls
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response_tool_calls_only,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Get weather for New York"}],
@@ -753,7 +753,7 @@ def test_tool_calls_only_no_content(mock_client, mock_openai_response_tool_calls
                     },
                 }
             ],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_openai_response_tool_calls_only
@@ -793,7 +793,7 @@ def test_responses_api_tool_calls(mock_client, mock_responses_api_with_tool_call
         "openai.resources.responses.Responses.create",
         return_value=mock_responses_api_with_tool_calls,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.responses.create(
             model="gpt-4o-mini",
             input=[{"role": "user", "content": "What's the weather in Chicago?"}],
@@ -808,7 +808,7 @@ def test_responses_api_tool_calls(mock_client, mock_responses_api_with_tool_call
                     },
                 }
             ],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_responses_api_with_tool_calls
@@ -851,7 +851,7 @@ def test_streaming_with_tool_calls(mock_client, streaming_tool_call_chunks):
         # Set up the mock to return our chunks when iterated
         mock_create.return_value = streaming_tool_call_chunks
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Call the streaming method
         response_generator = client.chat.completions.create(
@@ -870,7 +870,7 @@ def test_streaming_with_tool_calls(mock_client, streaming_tool_call_chunks):
                 }
             ],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         # Consume the generator to trigger the event capture
@@ -949,12 +949,12 @@ def test_responses_api(mock_client, mock_openai_response_with_responses_api):
         "openai.resources.responses.Responses.create",
         return_value=mock_openai_response_with_responses_api,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.responses.create(
             model="gpt-4o-mini",
             input="Hello",
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
         assert response == mock_openai_response_with_responses_api
         assert mock_client.capture.call_count == 1
@@ -986,7 +986,7 @@ def test_responses_parse(mock_client, mock_parsed_response):
         "openai.resources.responses.Responses.parse",
         return_value=mock_parsed_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.responses.parse(
             model="gpt-4o-2024-08-06",
             input=[
@@ -1016,8 +1016,8 @@ def test_responses_parse(mock_client, mock_parsed_response):
                     },
                 }
             },
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_parsed_response
@@ -1101,15 +1101,15 @@ def test_responses_api_streaming_with_tokens(mock_client):
         "openai.resources.responses.Responses.create",
         side_effect=mock_streaming_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Consume the streaming response
         response = client.responses.create(
             model="gpt-4o-mini",
             input=[{"role": "user", "content": "Test message"}],
             stream=True,
-            posthog_distinct_id="test-id",
-            posthog_properties={"test": "streaming"},
+            insights_distinct_id="test-id",
+            insights_properties={"test": "streaming"},
         )
 
         # Consume all chunks
@@ -1153,7 +1153,7 @@ async def test_async_chat_streaming_with_tool_calls(
     with patch(
         "openai.resources.chat.completions.AsyncCompletions.create", new=mock_create
     ):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         response_stream = await client.chat.completions.create(
             model="gpt-4",
@@ -1171,7 +1171,7 @@ async def test_async_chat_streaming_with_tool_calls(
                 }
             ],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         chunks = []
@@ -1239,14 +1239,14 @@ async def test_async_responses_streaming_with_tokens(mock_client):
         return chunk_iterable()
 
     with patch("openai.resources.responses.AsyncResponses.create", new=mock_create):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         response_stream = await client.responses.create(
             model="gpt-4o-mini",
             input=[{"role": "user", "content": "Test message"}],
             stream=True,
-            posthog_distinct_id="test-id",
-            posthog_properties={"test": "streaming"},
+            insights_distinct_id="test-id",
+            insights_properties={"test": "streaming"},
         )
 
         async for _ in response_stream:
@@ -1274,13 +1274,13 @@ async def test_async_embeddings_create(mock_client, mock_embedding_response):
     mock_create = AsyncMock(return_value=mock_embedding_response)
 
     with patch("openai.resources.embeddings.AsyncEmbeddings.create", new=mock_create):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         response = await client.embeddings.create(
             model="text-embedding-3-small",
             input="Hello world",
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
     assert response == mock_embedding_response
@@ -1304,7 +1304,7 @@ def test_tool_definition(mock_client, mock_openai_response):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_openai_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Define tools to be passed to the create function
         tools = [
@@ -1331,8 +1331,8 @@ def test_tool_definition(mock_client, mock_openai_response):
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": "hey"}],
             tools=tools,
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_openai_response
@@ -1392,11 +1392,11 @@ def test_web_search_perplexity_style(mock_client):
     mock_response = MockResponseWithAnnotations()
 
     with patch("openai.resources.chat.Completions.create", return_value=mock_response):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response = client.chat.completions.create(
             model="gpt-4-turbo",
             messages=[{"role": "user", "content": "What's happening in tech?"}],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_response
@@ -1445,13 +1445,13 @@ def test_web_search_responses_api(mock_client):
             return mock_response
 
         result = call_llm_and_track_usage(
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
             ph_client=mock_client,
             provider="openai",
-            posthog_trace_id=None,
-            posthog_properties=None,
-            posthog_privacy_mode=False,
-            posthog_groups=None,
+            insights_trace_id=None,
+            insights_properties=None,
+            insights_privacy_mode=False,
+            insights_groups=None,
             base_url="https://api.openai.com/v1",
             call_method=mock_create_call,
             model="gpt-4o",
@@ -1533,12 +1533,12 @@ def test_streaming_with_web_search(mock_client, streaming_web_search_chunks):
     with patch("openai.resources.chat.completions.Completions.create") as mock_create:
         mock_create.return_value = streaming_web_search_chunks
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response_generator = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Search for recent news"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         # Consume the generator to trigger the event capture
@@ -1569,12 +1569,12 @@ def test_streaming_with_web_search_on_non_usage_chunk(
     with patch("openai.resources.chat.completions.Completions.create") as mock_create:
         mock_create.return_value = streaming_web_search_chunks
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
         response_generator = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Search for recent news"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         # Consume the generator to trigger the event capture
@@ -1629,12 +1629,12 @@ async def test_async_chat_with_web_search(mock_client):
     with patch(
         "openai.resources.chat.completions.AsyncCompletions.create", new=mock_create
     ):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         response = await client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Search for recent news"}],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
     assert response == mock_response
@@ -1672,13 +1672,13 @@ async def test_async_chat_streaming_with_web_search(
     with patch(
         "openai.resources.chat.completions.AsyncCompletions.create", new=mock_create
     ):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         response_stream = await client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Search for recent news"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         chunks = []
@@ -1742,13 +1742,13 @@ def test_streaming_chat_extracts_model_from_chunk_when_not_in_kwargs(mock_client
     with patch("openai.resources.chat.completions.Completions.create") as mock_create:
         mock_create.return_value = chunks
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Note: NOT passing model in kwargs - simulates stored prompt usage
         response_generator = client.chat.completions.create(
             messages=[{"role": "user", "content": "Hello"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         # Consume the generator
@@ -1788,13 +1788,13 @@ def test_streaming_chat_prefers_kwargs_model_over_chunk_model(mock_client):
     with patch("openai.resources.chat.completions.Completions.create") as mock_create:
         mock_create.return_value = chunks
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         response_generator = client.chat.completions.create(
             model="gpt-4o-from-kwargs",  # Explicitly passed model
             messages=[{"role": "user", "content": "Hello"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         list(response_generator)
@@ -1839,13 +1839,13 @@ def test_streaming_responses_api_extracts_model_from_response_object(mock_client
     with patch("openai.resources.responses.Responses.create") as mock_create:
         mock_create.return_value = iter(chunks)
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Note: NOT passing model - simulates stored prompt
         response_generator = client.responses.create(
             input=[{"role": "user", "content": "Hello"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         list(response_generator)
@@ -1886,12 +1886,12 @@ def test_non_streaming_extracts_model_from_response(mock_client):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Note: NOT passing model in kwargs
         response = client.chat.completions.create(
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_response
@@ -1948,12 +1948,12 @@ def test_non_streaming_responses_api_extracts_model_from_response(mock_client):
         "openai.resources.responses.Responses.create",
         return_value=mock_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Note: NOT passing model in kwargs
         response = client.responses.create(
             input="Hello",
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_response
@@ -1995,12 +1995,12 @@ def test_non_streaming_returns_none_when_no_model(mock_client):
         "openai.resources.chat.completions.Completions.create",
         return_value=mock_response,
     ):
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         # Note: NOT passing model in kwargs and response has no model
         client.chat.completions.create(
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         call_args = mock_client.capture.call_args[1]
@@ -2032,12 +2032,12 @@ def test_streaming_falls_back_to_unknown_when_no_model(mock_client):
     with patch("openai.resources.chat.completions.Completions.create") as mock_create:
         mock_create.return_value = [chunk]
 
-        client = OpenAI(api_key="test-key", posthog_client=mock_client)
+        client = OpenAI(api_key="test-key", insights_client=mock_client)
 
         response_generator = client.chat.completions.create(
             messages=[{"role": "user", "content": "Hello"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         list(response_generator)
@@ -2083,13 +2083,13 @@ async def test_async_streaming_chat_extracts_model_from_chunk(mock_client):
     with patch(
         "openai.resources.chat.completions.AsyncCompletions.create", new=mock_create
     ):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         # Note: NOT passing model
         response_stream = await client.chat.completions.create(
             messages=[{"role": "user", "content": "Hello"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         async for _ in response_stream:
@@ -2137,12 +2137,12 @@ async def test_async_streaming_responses_extracts_model_from_response(mock_clien
         return chunk_iterable()
 
     with patch("openai.resources.responses.AsyncResponses.create", new=mock_create):
-        client = AsyncOpenAI(api_key="test-key", posthog_client=mock_client)
+        client = AsyncOpenAI(api_key="test-key", insights_client=mock_client)
 
         response_stream = await client.responses.create(
             input=[{"role": "user", "content": "Hello"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         async for _ in response_stream:

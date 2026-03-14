@@ -1,8 +1,8 @@
 """
-PostHog Python SDK Test Adapter
+Insights Python SDK Test Adapter
 
-This adapter implements the SDK Test Adapter Interface defined in the PostHog Capture API Contract.
-It wraps the posthog-python SDK and exposes a REST API for the test harness to exercise.
+This adapter implements the SDK Test Adapter Interface defined in the Capture API Contract.
+It wraps the insights-python SDK and exposes a REST API for the test harness to exercise.
 """
 
 import logging
@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from flask import Flask, jsonify, request
 
-from posthog import Client
+from hanzo_insights import Client
 from hanzo_insights.request import batch_post as original_batch_post
 from hanzo_insights.version import VERSION
 
@@ -193,7 +193,7 @@ def health():
     """Health check endpoint"""
     return jsonify(
         {
-            "sdk_name": "posthog-python",
+            "sdk_name": "insights-python",
             "sdk_version": VERSION,
             "adapter_version": "1.0.0",
         }

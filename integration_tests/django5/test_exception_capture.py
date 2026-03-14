@@ -1,10 +1,10 @@
 """
 Test that verifies exception capture functionality.
 
-These tests verify that exceptions are actually captured to PostHog, not just that
+These tests verify that exceptions are actually captured to Insights, not just that
 500 responses are returned.
 
-Without process_exception(), view exceptions are NOT captured to PostHog (v6.7.11 and earlier).
+Without process_exception(), view exceptions are NOT captured to Insights (v6.7.11 and earlier).
 With process_exception(), Django calls this method to capture exceptions before
 converting them to 500 responses.
 """
@@ -30,7 +30,7 @@ def asgi_app():
 @pytest.mark.asyncio
 async def test_async_exception_is_captured(asgi_app):
     """
-    Test that async view exceptions are captured to PostHog.
+    Test that async view exceptions are captured to Insights.
 
     The middleware's process_exception() method ensures exceptions are captured.
     Without it (v6.7.11 and earlier), exceptions are NOT captured even though 500 is returned.
@@ -50,7 +50,7 @@ async def test_async_exception_is_captured(asgi_app):
             }
         )
 
-    # Patch at the posthog module level where middleware imports from
+    # Patch at the hanzo_insights module level where middleware imports from
     with patch("hanzo_insights.capture_exception", side_effect=mock_capture):
         async with AsyncClient(
             transport=ASGITransport(app=asgi_app), base_url="http://testserver"
@@ -60,8 +60,8 @@ async def test_async_exception_is_captured(asgi_app):
         # Django returns 500
         assert response.status_code == 500
 
-        # CRITICAL: Verify PostHog captured the exception
-        assert len(captured) > 0, "Exception was NOT captured to PostHog!"
+        # CRITICAL: Verify Insights captured the exception
+        assert len(captured) > 0, "Exception was NOT captured to Insights!"
 
         # Verify it's the right exception
         exception_data = captured[0]
@@ -72,7 +72,7 @@ async def test_async_exception_is_captured(asgi_app):
 @pytest.mark.asyncio
 async def test_sync_exception_is_captured(asgi_app):
     """
-    Test that sync view exceptions are captured to PostHog.
+    Test that sync view exceptions are captured to Insights.
 
     The middleware's process_exception() method ensures exceptions are captured.
     Without it (v6.7.11 and earlier), exceptions are NOT captured even though 500 is returned.
@@ -92,7 +92,7 @@ async def test_sync_exception_is_captured(asgi_app):
             }
         )
 
-    # Patch at the posthog module level where middleware imports from
+    # Patch at the hanzo_insights module level where middleware imports from
     with patch("hanzo_insights.capture_exception", side_effect=mock_capture):
         async with AsyncClient(
             transport=ASGITransport(app=asgi_app), base_url="http://testserver"
@@ -102,8 +102,8 @@ async def test_sync_exception_is_captured(asgi_app):
         # Django returns 500
         assert response.status_code == 500
 
-        # CRITICAL: Verify PostHog captured the exception
-        assert len(captured) > 0, "Exception was NOT captured to PostHog!"
+        # CRITICAL: Verify Insights captured the exception
+        assert len(captured) > 0, "Exception was NOT captured to Insights!"
 
         # Verify it's the right exception
         exception_data = captured[0]
