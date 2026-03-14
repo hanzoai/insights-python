@@ -1,5 +1,5 @@
 """
-Constants for PostHog Python SDK documentation generation.
+Constants for Insights Python SDK documentation generation.
 """
 
 from typing import Dict, Union
@@ -8,8 +8,8 @@ from hanzo_insights.version import VERSION
 # Documentation generation metadata
 DOCUMENTATION_METADATA = {
     "hogRef": "0.3",
-    "slugPrefix": "posthog-python",
-    "specUrl": "https://github.com/PostHog/posthog-python",
+    "slugPrefix": "insights-python",
+    "specUrl": "https://github.com/Insights/insights-python",
 }
 
 # Docstring parsing patterns for new format
@@ -29,8 +29,8 @@ DOCSTRING_PATTERNS = {
 # Output file configuration
 OUTPUT_CONFIG: Dict[str, Union[str, int]] = {
     "output_dir": "./references",
-    "filename": f"posthog-python-references-{VERSION}.json",
-    "filename_latest": "posthog-python-references-latest.json",
+    "filename": f"insights-python-references-{VERSION}.json",
+    "filename_latest": "insights-python-references-latest.json",
     "indent": 2,
 }
 

@@ -10,8 +10,8 @@ def test_excepthook(tmpdir):
     app.write(
         dedent(
             """
-    from hanzo_insights import Posthog
-    posthog = Posthog('phc_x', host='https://eu.i.posthog.com', enable_exception_autocapture=True, debug=True, on_error=lambda e, batch: print('error handling batch: ', e, batch))
+    from hanzo_insights import Insights
+    client = Insights('phc_x', host='https://eu.i.insights.hanzo.ai', enable_exception_autocapture=True, debug=True, on_error=lambda e, batch: print('error handling batch: ', e, batch))
 
     # frame_value = "LOL"
 
@@ -40,14 +40,14 @@ def test_code_variables_capture(tmpdir):
         dedent(
             """
     import os
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
     
     class UnserializableObject:
         pass
     
-    posthog = Posthog(
+    client = Insights(
         'phc_x', 
-        host='https://eu.i.posthog.com', 
+        host='https://eu.i.insights.hanzo.ai', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -118,29 +118,29 @@ def test_code_variables_capture(tmpdir):
     assert b"'my_bool': 'True'" in output
     assert b'"my_dict": "{\\"name\\": \\"test\\", \\"value\\": 123}"' in output
     assert (
-        b'{\\"safe_key\\": \\"safe_value\\", \\"password\\": \\"$$_posthog_redacted_based_on_masking_rules_$$\\", \\"other_key\\": \\"$$_posthog_redacted_based_on_masking_rules_$$\\"}'
+        b'{\\"safe_key\\": \\"safe_value\\", \\"password\\": \\"$$_insights_redacted_based_on_masking_rules_$$\\", \\"other_key\\": \\"$$_insights_redacted_based_on_masking_rules_$$\\"}'
         in output
     )
     assert (
-        b'{\\"level1\\": {\\"level2\\": {\\"api_key\\": \\"$$_posthog_redacted_based_on_masking_rules_$$\\", \\"data\\": \\"$$_posthog_redacted_based_on_masking_rules_$$\\", \\"safe\\": \\"visible\\"}}}'
+        b'{\\"level1\\": {\\"level2\\": {\\"api_key\\": \\"$$_insights_redacted_based_on_masking_rules_$$\\", \\"data\\": \\"$$_insights_redacted_based_on_masking_rules_$$\\", \\"safe\\": \\"visible\\"}}}'
         in output
     )
     assert (
-        b'[\\"safe_item\\", \\"$$_posthog_redacted_based_on_masking_rules_$$\\", \\"another_safe\\"]'
+        b'[\\"safe_item\\", \\"$$_insights_redacted_based_on_masking_rules_$$\\", \\"another_safe\\"]'
         in output
     )
     assert (
-        b'[\\"tuple_safe\\", \\"$$_posthog_redacted_based_on_masking_rules_$$\\", \\"tuple_also_safe\\"]'
+        b'[\\"tuple_safe\\", \\"$$_insights_redacted_based_on_masking_rules_$$\\", \\"tuple_also_safe\\"]'
         in output
     )
     assert (
-        b'[{\\"id\\": 1, \\"password\\": \\"$$_posthog_redacted_based_on_masking_rules_$$\\"}, {\\"id\\": 2, \\"value\\": \\"safe_value\\"}]'
+        b'[{\\"id\\": 1, \\"password\\": \\"$$_insights_redacted_based_on_masking_rules_$$\\"}, {\\"id\\": 2, \\"value\\": \\"safe_value\\"}]'
         in output
     )
     assert b"<__main__.UnserializableObject object at" in output
-    assert b"'my_password': '$$_posthog_redacted_based_on_masking_rules_$$'" in output
+    assert b"'my_password': '$$_insights_redacted_based_on_masking_rules_$$'" in output
     assert (
-        b"'my_innocent_var': '$$_posthog_redacted_based_on_masking_rules_$$'" in output
+        b"'my_innocent_var': '$$_insights_redacted_based_on_masking_rules_$$'" in output
     )
     assert b"'__should_be_ignored':" not in output
 
@@ -161,11 +161,11 @@ def test_code_variables_context_override(tmpdir):
             """
     import os
     import hanzo_insights
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
     
-    posthog_client = Posthog(
+    insights_client = Insights(
         'phc_x', 
-        host='https://eu.i.posthog.com', 
+        host='https://eu.i.insights.hanzo.ai', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=False,
@@ -178,7 +178,7 @@ def test_code_variables_context_override(tmpdir):
         
         1/0
     
-    with hanzo_insights.new_context(client=posthog_client):
+    with hanzo_insights.new_context(client=insights_client):
         hanzo_insights.set_capture_exception_code_variables_context(True)
         hanzo_insights.set_code_variables_mask_patterns_context([r"(?i).*bank.*"])
         hanzo_insights.set_code_variables_ignore_patterns_context([])
@@ -195,7 +195,7 @@ def test_code_variables_context_override(tmpdir):
 
     assert b"ZeroDivisionError" in output
     assert b"code_variables" in output
-    assert b"'bank': '$$_posthog_redacted_based_on_masking_rules_$$'" in output
+    assert b"'bank': '$$_insights_redacted_based_on_masking_rules_$$'" in output
     assert b"'__dunder_var': 'should_be_visible'" in output
 
 
@@ -205,11 +205,11 @@ def test_code_variables_size_limiter(tmpdir):
         dedent(
             """
     import os
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
     
-    posthog = Posthog(
+    client = Insights(
         'phc_x', 
-        host='https://eu.i.posthog.com', 
+        host='https://eu.i.insights.hanzo.ai', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -299,11 +299,11 @@ def test_code_variables_disabled_capture(tmpdir):
         dedent(
             """
     import os
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
     
-    posthog = Posthog(
+    client = Insights(
         'phc_x', 
-        host='https://eu.i.posthog.com', 
+        host='https://eu.i.insights.hanzo.ai', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=False,
@@ -341,11 +341,11 @@ def test_code_variables_enabled_then_disabled_in_context(tmpdir):
             """
     import os
     import hanzo_insights
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
     
-    posthog_client = Posthog(
+    insights_client = Insights(
         'phc_x', 
-        host='https://eu.i.posthog.com', 
+        host='https://eu.i.insights.hanzo.ai', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -358,7 +358,7 @@ def test_code_variables_enabled_then_disabled_in_context(tmpdir):
         
         1/0
     
-    with hanzo_insights.new_context(client=posthog_client):
+    with hanzo_insights.new_context(client=insights_client):
         hanzo_insights.set_capture_exception_code_variables_context(False)
         
         process_data()
@@ -388,15 +388,15 @@ def test_code_variables_repr_fallback(tmpdir):
     from datetime import datetime, timedelta
     from decimal import Decimal
     from fractions import Fraction
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
     
     class CustomReprClass:
         def __repr__(self):
             return '<CustomReprClass: custom representation>'
     
-    posthog = Posthog(
+    client = Insights(
         'phc_x', 
-        host='https://eu.i.posthog.com', 
+        host='https://eu.i.insights.hanzo.ai', 
         debug=True, 
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -458,11 +458,11 @@ def test_code_variables_too_long_string_value_replaced(tmpdir):
         dedent(
             """
     import os
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
 
-    posthog = Posthog(
+    client = Insights(
         'phc_x',
-        host='https://eu.i.posthog.com',
+        host='https://eu.i.insights.hanzo.ai',
         debug=True,
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -491,9 +491,9 @@ def test_code_variables_too_long_string_value_replaced(tmpdir):
 
     assert "'short_value': 'I am short'" in output
 
-    assert "$$_posthog_value_too_long_$$" in output
+    assert "$$_insights_value_too_long_$$" in output
 
-    assert "'long_blob': '$$_posthog_value_too_long_$$'" in output
+    assert "'long_blob': '$$_insights_value_too_long_$$'" in output
 
 
 def test_code_variables_too_long_string_in_nested_dict(tmpdir):
@@ -502,11 +502,11 @@ def test_code_variables_too_long_string_in_nested_dict(tmpdir):
         dedent(
             """
     import os
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
 
-    posthog = Posthog(
+    client = Insights(
         'phc_x',
-        host='https://eu.i.posthog.com',
+        host='https://eu.i.insights.hanzo.ai',
         debug=True,
         enable_exception_autocapture=True,
         capture_exception_code_variables=True,
@@ -541,7 +541,7 @@ def test_code_variables_too_long_string_in_nested_dict(tmpdir):
     assert "short_val" in output
     assert "ok" in output
 
-    assert "$$_posthog_value_too_long_$$" in output
+    assert "$$_insights_value_too_long_$$" in output
     assert "y" * 1000 not in output
     assert "z" * 1000 not in output
 
@@ -567,7 +567,7 @@ def test_mask_sensitive_data_too_long_dict_key():
     assert result["short"] == "visible"
     # This then gets shortened by the JSON truncation at 1024 chars anyways so no worries
     assert result["k" * 20000] == CODE_VARIABLES_TOO_LONG_VALUE
-    assert result["password"] == "$$_posthog_redacted_based_on_masking_rules_$$"
+    assert result["password"] == "$$_insights_redacted_based_on_masking_rules_$$"
 
 
 def test_mask_sensitive_data_circular_ref():

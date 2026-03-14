@@ -1,5 +1,5 @@
 """
-Test views for validating PostHog middleware with Django 5 ASGI.
+Test views for validating Insights middleware with Django 5 ASGI.
 """
 
 from django.http import JsonResponse

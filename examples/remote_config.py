@@ -8,7 +8,7 @@ import hanzo_insights
 # Initialize Insights client
 hanzo_insights.api_key = "phc_..."
 hanzo_insights.personal_api_key = "phs_..."  # or "phx_..."
-hanzo_insights.host = "http://localhost:8000"  # or "https://us.posthog.com"
+hanzo_insights.host = "http://localhost:8000"  # or "https://us.insights.hanzo.ai"
 hanzo_insights.debug = True
 
 

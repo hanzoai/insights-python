@@ -20,9 +20,9 @@ class AnthropicBedrock(anthropic.AnthropicBedrock):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
         self.messages = WrappedMessages(self)
 
 
@@ -33,9 +33,9 @@ class AsyncAnthropicBedrock(anthropic.AsyncAnthropicBedrock):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
         self.messages = AsyncWrappedMessages(self)
 
 
@@ -46,9 +46,9 @@ class AnthropicVertex(anthropic.AnthropicVertex):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
         self.messages = WrappedMessages(self)
 
 
@@ -59,7 +59,7 @@ class AsyncAnthropicVertex(anthropic.AsyncAnthropicVertex):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
         self.messages = AsyncWrappedMessages(self)

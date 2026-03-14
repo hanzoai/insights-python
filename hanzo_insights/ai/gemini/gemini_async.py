@@ -35,14 +35,14 @@ class AsyncClient:
     Usage:
         client = AsyncClient(
             api_key="your_api_key",
-            posthog_client=posthog_client,
-            posthog_distinct_id="default_user",  # Optional defaults
-            posthog_properties={"team": "ai"}    # Optional defaults
+            insights_client=insights_client,
+            insights_distinct_id="default_user",  # Optional defaults
+            insights_properties={"team": "ai"}    # Optional defaults
         )
         response = await client.models.generate_content(
             model="gemini-2.0-flash",
             contents=["Hello world"],
-            posthog_distinct_id="specific_user"  # Override default
+            insights_distinct_id="specific_user"  # Override default
         )
     """
 
@@ -57,11 +57,11 @@ class AsyncClient:
         location: Optional[str] = None,
         debug_config: Optional[Any] = None,
         http_options: Optional[Any] = None,
-        posthog_client: Optional[InsightsClient] = None,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_client: Optional[InsightsClient] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         """
@@ -73,18 +73,18 @@ class AsyncClient:
             location: GCP location for Vertex AI
             debug_config: Debug configuration for the client
             http_options: HTTP options for the client
-            posthog_client: Insights client for tracking usage
-            posthog_distinct_id: Default distinct ID for all calls (can be overridden per call)
-            posthog_properties: Default properties for all calls (can be overridden per call)
-            posthog_privacy_mode: Default privacy mode for all calls (can be overridden per call)
-            posthog_groups: Default groups for all calls (can be overridden per call)
+            insights_client: Insights client for tracking usage
+            insights_distinct_id: Default distinct ID for all calls (can be overridden per call)
+            insights_properties: Default properties for all calls (can be overridden per call)
+            insights_privacy_mode: Default privacy mode for all calls (can be overridden per call)
+            insights_groups: Default groups for all calls (can be overridden per call)
             **kwargs: Additional arguments (for future compatibility)
         """
 
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
 
         if self._ph_client is None:
-            raise ValueError("posthog_client is required for Insights tracking")
+            raise ValueError("insights_client is required for Insights tracking")
 
         self.models = AsyncModels(
             api_key=api_key,
@@ -94,11 +94,11 @@ class AsyncClient:
             location=location,
             debug_config=debug_config,
             http_options=http_options,
-            posthog_client=self._ph_client,
-            posthog_distinct_id=posthog_distinct_id,
-            posthog_properties=posthog_properties,
-            posthog_privacy_mode=posthog_privacy_mode,
-            posthog_groups=posthog_groups,
+            insights_client=self._ph_client,
+            insights_distinct_id=insights_distinct_id,
+            insights_properties=insights_properties,
+            insights_privacy_mode=insights_privacy_mode,
+            insights_groups=insights_groups,
             **kwargs,
         )
 
@@ -119,11 +119,11 @@ class AsyncModels:
         location: Optional[str] = None,
         debug_config: Optional[Any] = None,
         http_options: Optional[Any] = None,
-        posthog_client: Optional[InsightsClient] = None,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_client: Optional[InsightsClient] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         """
@@ -135,24 +135,24 @@ class AsyncModels:
             location: GCP location for Vertex AI
             debug_config: Debug configuration for the client
             http_options: HTTP options for the client
-            posthog_client: Insights client for tracking usage
-            posthog_distinct_id: Default distinct ID for all calls
-            posthog_properties: Default properties for all calls
-            posthog_privacy_mode: Default privacy mode for all calls
-            posthog_groups: Default groups for all calls
+            insights_client: Insights client for tracking usage
+            insights_distinct_id: Default distinct ID for all calls
+            insights_properties: Default properties for all calls
+            insights_privacy_mode: Default privacy mode for all calls
+            insights_groups: Default groups for all calls
             **kwargs: Additional arguments (for future compatibility)
         """
 
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
 
         if self._ph_client is None:
-            raise ValueError("posthog_client is required for Insights tracking")
+            raise ValueError("insights_client is required for Insights tracking")
 
         # Store default Insights settings
-        self._default_distinct_id = posthog_distinct_id
-        self._default_properties = posthog_properties or {}
-        self._default_privacy_mode = posthog_privacy_mode
-        self._default_groups = posthog_groups
+        self._default_distinct_id = insights_distinct_id
+        self._default_properties = insights_properties or {}
+        self._default_privacy_mode = insights_privacy_mode
+        self._default_groups = insights_groups
 
         # Build genai.Client arguments
         client_args: Dict[str, Any] = {}
@@ -196,7 +196,7 @@ class AsyncModels:
         self._client = genai.Client(**client_args)
         self._base_url = "https://generativelanguage.googleapis.com"
 
-    def _merge_posthog_params(
+    def _merge_insights_params(
         self,
         call_distinct_id: Optional[str],
         call_trace_id: Optional[str],
@@ -234,11 +234,11 @@ class AsyncModels:
         self,
         model: str,
         contents,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: Optional[bool] = None,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: Optional[bool] = None,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
         """
@@ -250,22 +250,22 @@ class AsyncModels:
         Args:
             model: The model to use (e.g., 'gemini-2.0-flash')
             contents: The input content for generation
-            posthog_distinct_id: ID to associate with the usage event (overrides client default)
-            posthog_trace_id: Trace UUID for linking events (auto-generated if not provided)
-            posthog_properties: Extra properties to include in the event (merged with client defaults)
-            posthog_privacy_mode: Whether to redact sensitive information (overrides client default)
-            posthog_groups: Group analytics properties (overrides client default)
+            insights_distinct_id: ID to associate with the usage event (overrides client default)
+            insights_trace_id: Trace UUID for linking events (auto-generated if not provided)
+            insights_properties: Extra properties to include in the event (merged with client defaults)
+            insights_privacy_mode: Whether to redact sensitive information (overrides client default)
+            insights_groups: Group analytics properties (overrides client default)
             **kwargs: Arguments passed to Gemini's generate_content
         """
 
         # Merge Insights parameters
         distinct_id, trace_id, properties, privacy_mode, groups = (
-            self._merge_posthog_params(
-                posthog_distinct_id,
-                posthog_trace_id,
-                posthog_properties,
-                posthog_privacy_mode,
-                posthog_groups,
+            self._merge_insights_params(
+                insights_distinct_id,
+                insights_trace_id,
+                insights_properties,
+                insights_privacy_mode,
+                insights_groups,
             )
         )
 
@@ -393,21 +393,21 @@ class AsyncModels:
         self,
         model: str,
         contents,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: Optional[bool] = None,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: Optional[bool] = None,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
         # Merge Insights parameters
         distinct_id, trace_id, properties, privacy_mode, groups = (
-            self._merge_posthog_params(
-                posthog_distinct_id,
-                posthog_trace_id,
-                posthog_properties,
-                posthog_privacy_mode,
-                posthog_groups,
+            self._merge_insights_params(
+                insights_distinct_id,
+                insights_trace_id,
+                insights_properties,
+                insights_privacy_mode,
+                insights_groups,
             )
         )
 

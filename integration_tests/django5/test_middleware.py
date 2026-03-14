@@ -1,5 +1,5 @@
 """
-Tests for PostHog Django middleware in async context.
+Tests for Insights Django middleware in async context.
 
 These tests verify that the middleware correctly handles:
 1. Async user access (request.auser() in Django 5)
@@ -103,7 +103,7 @@ async def test_async_authenticated_user_access(asgi_app):
 
     # Make request with session cookie - this should trigger the bug in v6.7.11
     # Disable exception capture to see the SynchronousOnlyOperation clearly
-    with override_settings(POSTHOG_MW_CAPTURE_EXCEPTIONS=False):
+    with override_settings(INSIGHTS_MW_CAPTURE_EXCEPTIONS=False):
         async with AsyncClient(
             transport=ASGITransport(app=asgi_app),
             base_url="http://testserver",
@@ -139,10 +139,10 @@ async def test_async_exception_capture(asgi_app):
     """
     Test that middleware handles exceptions from async views.
 
-    The middleware's process_exception() method captures view exceptions to PostHog
+    The middleware's process_exception() method captures view exceptions to Insights
     before Django converts them to 500 responses. This test verifies the exception
     causes a 500 response. See test_exception_capture.py for tests that verify
-    actual exception capture to PostHog.
+    actual exception capture to Insights.
     """
     async with AsyncClient(
         transport=ASGITransport(app=asgi_app), base_url="http://testserver"
@@ -158,7 +158,7 @@ async def test_sync_exception_capture(asgi_app):
     """
     Test that middleware handles exceptions from sync views.
 
-    The middleware's process_exception() method captures view exceptions to PostHog.
+    The middleware's process_exception() method captures view exceptions to Insights.
     This test verifies the exception causes a 500 response.
     """
     async with AsyncClient(

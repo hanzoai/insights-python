@@ -1,7 +1,7 @@
 """
 Tests for FlagDefinitionCacheProvider functionality.
 
-These tests follow the patterns from the TypeScript implementation in posthog-js/packages/node.
+These tests follow the patterns from the TypeScript implementation in insights-js/packages/node.
 """
 
 import threading

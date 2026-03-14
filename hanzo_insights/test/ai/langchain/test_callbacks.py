@@ -113,7 +113,7 @@ def test_metadata_capture(mock_client):
         base_url="https://us.posthog.com",
         name="test",
         end_time=None,
-        posthog_properties=None,
+        insights_properties=None,
     )
     assert callbacks._runs[run_id] == expected
     with patch("time.time", return_value=1234567891):
@@ -1049,7 +1049,7 @@ def test_base_url_retrieval(mock_client):
     prompt = ChatPromptTemplate.from_messages([("user", "Foo")])
     chain = prompt | ChatOpenAI(
         api_key="test",
-        model="posthog-mini",
+        model="insights-mini",
         base_url="https://test.posthog.com",
     )
     callbacks = CallbackHandler(mock_client)
@@ -1270,7 +1270,7 @@ def test_metadata_tools(mock_client):
         name="test",
         tools=tools,
         end_time=None,
-        posthog_properties=None,
+        insights_properties=None,
     )
     assert callbacks._runs[run_id] == expected
     with patch("time.time", return_value=1234567891):
@@ -1867,7 +1867,7 @@ def test_openai_reasoning_tokens_o4_mini(mock_client):
 
 
 def test_callback_handler_without_client():
-    """Test that CallbackHandler works properly when no PostHog client is passed."""
+    """Test that CallbackHandler works properly when no Insights client is passed."""
     with patch("hanzo_insights.ai.langchain.callbacks.setup") as mock_setup:
         mock_client = mock_setup.return_value
 
@@ -1984,7 +1984,7 @@ def test_tool_definition(mock_client):
     assert run == expected
     assert callbacks._runs == {}
 
-    # Now test that the tools are properly captured in the PostHog event
+    # Now test that the tools are properly captured in the Insights event
     mock_response = MagicMock()
     mock_response.generations = [[MagicMock()]]
 
@@ -2266,8 +2266,8 @@ def test_agent_action_and_finish_imports():
     assert call_args["event"] == "$ai_span"
 
 
-def test_posthog_properties_field_in_generation_metadata(mock_client):
-    """Test that posthog_properties is properly stored in GenerationMetadata."""
+def test_insights_properties_field_in_generation_metadata(mock_client):
+    """Test that insights_properties is properly stored in GenerationMetadata."""
     callbacks = CallbackHandler(mock_client)
     run_id = uuid.uuid4()
 
@@ -2281,7 +2281,7 @@ def test_posthog_properties_field_in_generation_metadata(mock_client):
             metadata={
                 "ls_model_name": "gpt-4o",
                 "ls_provider": "openai",
-                "posthog_properties": {"$ai_billable": True},
+                "insights_properties": {"$ai_billable": True},
             },
             name="test",
         )
@@ -2294,11 +2294,11 @@ def test_posthog_properties_field_in_generation_metadata(mock_client):
         provider="openai",
         base_url="https://api.openai.com",
         name="test",
-        posthog_properties={"$ai_billable": True},
+        insights_properties={"$ai_billable": True},
         end_time=None,
     )
     assert callbacks._runs[run_id] == expected
-    assert callbacks._runs[run_id].posthog_properties == {"$ai_billable": True}
+    assert callbacks._runs[run_id].insights_properties == {"$ai_billable": True}
 
     callbacks._pop_run_metadata(run_id)
 
@@ -2313,15 +2313,15 @@ def test_posthog_properties_field_in_generation_metadata(mock_client):
             metadata={
                 "ls_model_name": "gpt-4o",
                 "ls_provider": "openai",
-                "posthog_properties": {"$ai_billable": False},
+                "insights_properties": {"$ai_billable": False},
             },
             name="test",
         )
 
-    assert callbacks._runs[run_id2].posthog_properties == {"$ai_billable": False}
+    assert callbacks._runs[run_id2].insights_properties == {"$ai_billable": False}
     callbacks._pop_run_metadata(run_id2)
 
-    # Test when posthog_properties not provided
+    # Test when insights_properties not provided
     run_id3 = uuid.uuid4()
     with patch("time.time", return_value=1234567890):
         callbacks._set_llm_metadata(
@@ -2333,7 +2333,7 @@ def test_posthog_properties_field_in_generation_metadata(mock_client):
             name="test",
         )
 
-    assert callbacks._runs[run_id3].posthog_properties is None
+    assert callbacks._runs[run_id3].insights_properties is None
 
 
 def test_billable_property_in_generation_event(mock_client):
@@ -2349,7 +2349,7 @@ def test_billable_property_in_generation_event(mock_client):
             run_id,
             messages=[{"role": "user", "content": "Test"}],
             metadata={
-                "posthog_properties": {"$ai_billable": True},
+                "insights_properties": {"$ai_billable": True},
                 "ls_model_name": "test-model",
             },
             invocation_params={},
@@ -2412,12 +2412,12 @@ def test_billable_with_real_chain(mock_client):
             metadata={
                 "ls_model_name": "fake-model",
                 "ls_provider": "fake",
-                "posthog_properties": {"$ai_billable": True},
+                "insights_properties": {"$ai_billable": True},
             },
             invocation_params={"temperature": 0.7},
         )
 
-    assert callbacks._runs[run_id].posthog_properties == {"$ai_billable": True}
+    assert callbacks._runs[run_id].insights_properties == {"$ai_billable": True}
 
     mock_response = MagicMock()
     mock_response.generations = [[MagicMock()]]

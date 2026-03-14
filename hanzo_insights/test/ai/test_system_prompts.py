@@ -26,7 +26,7 @@ class TestSystemPromptCapture(unittest.TestCase):
         self.test_user_message = "Hello, how are you?"
         self.test_response = "I'm doing well, thank you!"
 
-        # Create mock PostHog client
+        # Create mock Insights client
         self.client = Client(FAKE_TEST_API_KEY)
         self.client._enqueue = MagicMock()
         self.client.privacy_mode = False
@@ -88,7 +88,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             "openai.resources.chat.completions.Completions.create",
             return_value=mock_response,
         ):
-            client = OpenAI(posthog_client=self.client, api_key="test")
+            client = OpenAI(insights_client=self.client, api_key="test")
 
             messages = [
                 {"role": "system", "content": self.test_system_prompt},
@@ -96,7 +96,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             ]
 
             client.chat.completions.create(
-                model="gpt-4", messages=messages, posthog_distinct_id="test-user"
+                model="gpt-4", messages=messages, insights_distinct_id="test-user"
             )
 
             self.assertEqual(len(self.client._enqueue.call_args_list), 1)
@@ -137,7 +137,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             "openai.resources.chat.completions.Completions.create",
             return_value=mock_response,
         ):
-            client = OpenAI(posthog_client=self.client, api_key="test")
+            client = OpenAI(insights_client=self.client, api_key="test")
 
             messages = [{"role": "user", "content": self.test_user_message}]
 
@@ -145,7 +145,7 @@ class TestSystemPromptCapture(unittest.TestCase):
                 model="gpt-4",
                 messages=messages,
                 system=self.test_system_prompt,
-                posthog_distinct_id="test-user",
+                insights_distinct_id="test-user",
             )
 
             self.assertEqual(len(self.client._enqueue.call_args_list), 1)
@@ -201,7 +201,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             "openai.resources.chat.completions.Completions.create",
             return_value=[chunk1, chunk2],
         ):
-            client = OpenAI(posthog_client=self.client, api_key="test")
+            client = OpenAI(insights_client=self.client, api_key="test")
 
             messages = [{"role": "user", "content": self.test_user_message}]
 
@@ -210,7 +210,7 @@ class TestSystemPromptCapture(unittest.TestCase):
                 messages=messages,
                 system=self.test_system_prompt,
                 stream=True,
-                posthog_distinct_id="test-user",
+                insights_distinct_id="test-user",
             )
 
             list(response_generator)  # Consume generator
@@ -235,7 +235,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             mock_response.usage.cache_creation_input_tokens = None
             mock_create.return_value = mock_response
 
-            client = Anthropic(posthog_client=self.client, api_key="test")
+            client = Anthropic(insights_client=self.client, api_key="test")
 
             messages = [
                 {"role": "system", "content": self.test_system_prompt},
@@ -245,7 +245,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             client.messages.create(
                 model="claude-3-5-sonnet-20241022",
                 messages=messages,
-                posthog_distinct_id="test-user",
+                insights_distinct_id="test-user",
             )
 
             self.assertEqual(len(self.client._enqueue.call_args_list), 1)
@@ -267,7 +267,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             mock_response.usage.cache_creation_input_tokens = None
             mock_create.return_value = mock_response
 
-            client = Anthropic(posthog_client=self.client, api_key="test")
+            client = Anthropic(insights_client=self.client, api_key="test")
 
             messages = [{"role": "user", "content": self.test_user_message}]
 
@@ -275,7 +275,7 @@ class TestSystemPromptCapture(unittest.TestCase):
                 model="claude-3-5-sonnet-20241022",
                 messages=messages,
                 system=self.test_system_prompt,
-                posthog_distinct_id="test-user",
+                insights_distinct_id="test-user",
             )
 
             self.assertEqual(len(self.client._enqueue.call_args_list), 1)
@@ -306,7 +306,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             mock_client_instance.models = mock_models_instance
             mock_genai_class.return_value = mock_client_instance
 
-            client = Client(posthog_client=self.client, api_key="test")
+            client = Client(insights_client=self.client, api_key="test")
 
             contents = [
                 {"role": "system", "content": self.test_system_prompt},
@@ -316,7 +316,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             client.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=contents,
-                posthog_distinct_id="test-user",
+                insights_distinct_id="test-user",
             )
 
             self.assertEqual(len(self.client._enqueue.call_args_list), 1)
@@ -346,7 +346,7 @@ class TestSystemPromptCapture(unittest.TestCase):
             mock_client_instance.models = mock_models_instance
             mock_genai_class.return_value = mock_client_instance
 
-            client = Client(posthog_client=self.client, api_key="test")
+            client = Client(insights_client=self.client, api_key="test")
 
             contents = [{"role": "user", "content": self.test_user_message}]
             config = {"system_instruction": self.test_system_prompt}
@@ -355,7 +355,7 @@ class TestSystemPromptCapture(unittest.TestCase):
                 model="gemini-2.0-flash",
                 contents=contents,
                 config=config,
-                posthog_distinct_id="test-user",
+                insights_distinct_id="test-user",
             )
 
             self.assertEqual(len(self.client._enqueue.call_args_list), 1)

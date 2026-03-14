@@ -172,13 +172,13 @@ def test_new_client_basic_generation(
     """Test the new Client/Models API structure"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Tell me a fun fact about hedgehogs"],
-        posthog_distinct_id="test-id",
-        posthog_properties={"foo": "bar"},
+        insights_distinct_id="test-id",
+        insights_properties={"foo": "bar"},
     )
 
     assert response == mock_gemini_response
@@ -239,13 +239,13 @@ def test_new_client_streaming_with_generate_content_stream(
         mock_streaming_response()
     )
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content_stream(
         model="gemini-2.0-flash",
         contents=["Write a short story"],
-        posthog_distinct_id="test-id",
-        posthog_properties={"feature": "streaming"},
+        insights_distinct_id="test-id",
+        insights_properties={"feature": "streaming"},
     )
 
     chunks = list(response)
@@ -298,7 +298,7 @@ def test_new_client_streaming_with_tools(mock_client, mock_google_genai_client):
         mock_streaming_response()
     )
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     # Create mock tools configuration
     mock_tool = MagicMock()
@@ -326,8 +326,8 @@ def test_new_client_streaming_with_tools(mock_client, mock_google_genai_client):
         model="gemini-2.0-flash",
         contents=["What's the weather in SF?"],
         config=mock_config,
-        posthog_distinct_id="test-id",
-        posthog_properties={"feature": "streaming_with_tools"},
+        insights_distinct_id="test-id",
+        insights_properties={"feature": "streaming_with_tools"},
     )
 
     chunks = list(response)
@@ -357,13 +357,13 @@ def test_new_client_groups(mock_client, mock_google_genai_client, mock_gemini_re
     """Test groups functionality with new Client API"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
-        posthog_groups={"company": "company_123"},
+        insights_distinct_id="test-id",
+        insights_groups={"company": "company_123"},
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -376,13 +376,13 @@ def test_new_client_privacy_mode_local(
     """Test local privacy mode with new Client API"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
-        posthog_privacy_mode=True,
+        insights_distinct_id="test-id",
+        insights_privacy_mode=True,
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -399,12 +399,12 @@ def test_new_client_privacy_mode_global(
 
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -419,11 +419,11 @@ def test_new_client_different_input_formats(
     """Test different input formats with new Client API"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     # Test string input
     client.models.generate_content(
-        model="gemini-2.0-flash", contents="Hello", posthog_distinct_id="test-id"
+        model="gemini-2.0-flash", contents="Hello", insights_distinct_id="test-id"
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -434,7 +434,7 @@ def test_new_client_different_input_formats(
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[{"role": "user", "parts": [{"text": "hey"}]}],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -447,7 +447,7 @@ def test_new_client_different_input_formats(
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[{"role": "user", "parts": [{"text": "Hello "}, {"text": "world"}]}],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -464,7 +464,7 @@ def test_new_client_different_input_formats(
     # Test list input with string
     mock_client.capture.reset_mock()
     client.models.generate_content(
-        model="gemini-2.0-flash", contents=["List item"], posthog_distinct_id="test-id"
+        model="gemini-2.0-flash", contents=["List item"], insights_distinct_id="test-id"
     )
     call_args = mock_client.capture.call_args[1]
     props = call_args["properties"]
@@ -477,12 +477,12 @@ def test_new_client_model_parameters(
     """Test model parameters with new Client API"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
         temperature=0.7,
         max_tokens=100,
     )
@@ -496,16 +496,16 @@ def test_new_client_model_parameters(
 def test_new_client_default_settings(
     mock_client, mock_google_genai_client, mock_gemini_response
 ):
-    """Test client with default PostHog settings"""
+    """Test client with default Insights settings"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
     client = Client(
         api_key="test-key",
-        posthog_client=mock_client,
-        posthog_distinct_id="default_user",
-        posthog_properties={"team": "ai"},
-        posthog_privacy_mode=False,
-        posthog_groups={"company": "acme_corp"},
+        insights_client=mock_client,
+        insights_distinct_id="default_user",
+        insights_properties={"team": "ai"},
+        insights_privacy_mode=False,
+        insights_groups={"company": "acme_corp"},
     )
 
     # Call without overriding defaults
@@ -527,21 +527,21 @@ def test_new_client_override_defaults(
 
     client = Client(
         api_key="test-key",
-        posthog_client=mock_client,
-        posthog_distinct_id="default_user",
-        posthog_properties={"team": "ai"},
-        posthog_privacy_mode=False,
-        posthog_groups={"company": "acme_corp"},
+        insights_client=mock_client,
+        insights_distinct_id="default_user",
+        insights_properties={"team": "ai"},
+        insights_privacy_mode=False,
+        insights_groups={"company": "acme_corp"},
     )
 
     # Override defaults in call
     client.models.generate_content(
         model="gemini-2.0-flash",
         contents=["Hello"],
-        posthog_distinct_id="specific_user",
-        posthog_properties={"feature": "chat", "urgent": True},
-        posthog_privacy_mode=True,
-        posthog_groups={"organization": "special_org"},
+        insights_distinct_id="specific_user",
+        insights_properties={"feature": "chat", "urgent": True},
+        insights_privacy_mode=True,
+        insights_groups={"organization": "special_org"},
     )
 
     call_args = mock_client.capture.call_args[1]
@@ -577,7 +577,7 @@ def test_vertex_ai_parameters_passed_through(
         location="us-central1",
         debug_config=mock_debug_config,
         http_options=mock_http_options,
-        posthog_client=mock_client,
+        insights_client=mock_client,
     )
 
     # Verify genai.Client was called with correct parameters
@@ -597,7 +597,7 @@ def test_api_key_mode(mock_client, mock_google_genai_client):
     # Create client with just API key (traditional mode)
     Client(
         api_key="test-api-key",
-        posthog_client=mock_client,
+        insights_client=mock_client,
     )
 
     # Verify genai.Client was called with only api_key
@@ -618,7 +618,7 @@ def test_vertex_ai_mode_with_optional_api_key(
         api_key="test-api-key",
         credentials=mock_credentials,
         project="test-project",
-        posthog_client=mock_client,
+        insights_client=mock_client,
     )
 
     # Verify genai.Client was called with both Vertex AI params and API key
@@ -634,7 +634,7 @@ def test_tool_use_response(mock_client, mock_google_genai_client, mock_gemini_re
     """Test that tools defined in config are captured in $ai_tools property"""
     mock_google_genai_client.models.generate_content.return_value = mock_gemini_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     # Create mock tools configuration
     mock_tool = MagicMock()
@@ -664,8 +664,8 @@ def test_tool_use_response(mock_client, mock_google_genai_client, mock_gemini_re
         model="gemini-2.5-flash",
         contents=["hey"],
         config=mock_config,
-        posthog_distinct_id="test-id",
-        posthog_properties={"foo": "bar"},
+        insights_distinct_id="test-id",
+        insights_properties={"foo": "bar"},
     )
 
     assert response == mock_gemini_response
@@ -702,12 +702,12 @@ def test_function_calls_in_output_choices(
         mock_gemini_response_with_function_calls
     )
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=["What's the weather in San Francisco?"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_gemini_response_with_function_calls
@@ -751,12 +751,12 @@ def test_function_calls_only_no_content(
         mock_gemini_response_function_calls_only
     )
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=["Get weather for New York"],
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_gemini_response_function_calls_only
@@ -810,12 +810,12 @@ def test_cache_and_reasoning_tokens(mock_client, mock_google_genai_client):
 
     mock_google_genai_client.models.generate_content.return_value = mock_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content(
         model="gemini-2.5-pro",
         contents="Test with cache",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_response
@@ -869,19 +869,19 @@ def test_streaming_cache_and_reasoning_tokens(mock_client, mock_google_genai_cli
     mock_stream = iter([chunk1, chunk2])
     mock_google_genai_client.models.generate_content_stream.return_value = mock_stream
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content_stream(
         model="gemini-2.5-pro",
         contents="Test streaming with cache",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     # Consume the stream
     result = list(response)
     assert len(result) == 2
 
-    # Check PostHog capture was called
+    # Check Insights capture was called
     assert mock_client.capture.call_count == 1
 
     call_args = mock_client.capture.call_args[1]
@@ -946,11 +946,11 @@ def test_web_search_grounding(mock_client, mock_google_genai_client):
     # Mock the generate_content method
     mock_google_genai_client.models.generate_content.return_value = mock_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents="What's the latest news?",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_response
@@ -1015,12 +1015,12 @@ def test_streaming_with_web_search(mock_client, mock_google_genai_client):
         mock_streaming_response()
     )
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content_stream(
         model="gemini-2.5-flash",
         contents="What's the latest news?",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     chunks = list(response)
@@ -1080,12 +1080,12 @@ def test_empty_grounding_metadata_no_web_search(mock_client, mock_google_genai_c
     # Mock the generate_content method
     mock_google_genai_client.models.generate_content.return_value = mock_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents="Hello",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_response
@@ -1143,12 +1143,12 @@ def test_empty_array_grounding_metadata_no_web_search(
     # Mock the generate_content method
     mock_google_genai_client.models.generate_content.return_value = mock_response
 
-    client = Client(api_key="test-key", posthog_client=mock_client)
+    client = Client(api_key="test-key", insights_client=mock_client)
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents="What can you do?",
-        posthog_distinct_id="test-id",
+        insights_distinct_id="test-id",
     )
 
     assert response == mock_response

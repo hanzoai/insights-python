@@ -65,15 +65,6 @@ make test
 pytest -k test_no_api_key
 ```
 
-## Backward Compatibility
-
-For users migrating from `posthog` or `posthoganalytics`, the `Posthog` class name is
-available as an alias for `Insights`:
-
-```python
-from hanzo_insights import Posthog  # works, same as Insights
-```
-
 ## License
 
 MIT

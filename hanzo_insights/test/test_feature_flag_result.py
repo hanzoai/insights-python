@@ -712,7 +712,7 @@ class TestGetFeatureFlagResult(unittest.TestCase):
 class TestFeatureFlagErrorWithStaleCacheFallback(unittest.TestCase):
     """Tests for stale cache fallback behavior when flag evaluation fails.
 
-    When the PostHog API is unavailable (timeout, connection error, etc.), the SDK
+    When the Insights API is unavailable (timeout, connection error, etc.), the SDK
     falls back to stale cached flag values if available. These tests verify that:
     1. The stale cached value is returned when an error occurs
     2. The $feature_flag_error property is still set (for debugging)

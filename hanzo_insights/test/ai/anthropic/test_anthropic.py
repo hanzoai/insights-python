@@ -279,12 +279,12 @@ def test_basic_completion(mock_client, mock_anthropic_response):
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_anthropic_response
@@ -325,12 +325,12 @@ def test_tokens_source_passthrough(mock_client, mock_anthropic_response):
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_properties={"$ai_input_tokens": 99999},
+            insights_distinct_id="test-id",
+            insights_properties={"$ai_input_tokens": 99999},
         )
 
         props = mock_client.capture.call_args[1]["properties"]
@@ -342,12 +342,12 @@ def test_groups(mock_client, mock_anthropic_response):
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_groups={"company": "test_company"},
+            insights_distinct_id="test-id",
+            insights_groups={"company": "test_company"},
         )
 
         assert response == mock_anthropic_response
@@ -361,12 +361,12 @@ def test_privacy_mode_local(mock_client, mock_anthropic_response):
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_privacy_mode=True,
+            insights_distinct_id="test-id",
+            insights_privacy_mode=True,
         )
 
         assert response == mock_anthropic_response
@@ -383,12 +383,12 @@ def test_privacy_mode_global(mock_client, mock_anthropic_response):
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
         mock_client.privacy_mode = True
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_privacy_mode=False,
+            insights_distinct_id="test-id",
+            insights_privacy_mode=False,
         )
 
         assert response == mock_anthropic_response
@@ -407,14 +407,14 @@ def test_basic_integration(mock_client):
         "anthropic.resources.Messages.create",
         return_value=create_mock_response(),
     ):
-        client = Anthropic(posthog_client=mock_client)
+        client = Anthropic(insights_client=mock_client)
         client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Foo"}],
             max_tokens=1,
             temperature=0,
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
             system="You must always answer with 'Bar'.",
         )
 
@@ -452,7 +452,7 @@ async def test_basic_async_integration(mock_client):
         "anthropic.resources.messages.AsyncMessages.create",
         side_effect=mock_async_create,
     ):
-        client = AsyncAnthropic(posthog_client=mock_client)
+        client = AsyncAnthropic(insights_client=mock_client)
         await client.messages.create(
             model="claude-3-opus-20240229",
             messages=[
@@ -460,8 +460,8 @@ async def test_basic_async_integration(mock_client):
             ],
             max_tokens=1,
             temperature=0,
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
     assert mock_client.capture.call_count == 1
@@ -513,7 +513,7 @@ async def test_async_streaming_system_prompt(mock_client):
         "anthropic.resources.messages.AsyncMessages.create",
         side_effect=async_create_wrapper,
     ):
-        client = AsyncAnthropic(posthog_client=mock_client)
+        client = AsyncAnthropic(insights_client=mock_client)
         response = await client.messages.create(
             model="claude-3-opus-20240229",
             system="You must always answer with 'Bar'.",
@@ -541,7 +541,7 @@ def test_error(mock_client, mock_anthropic_response):
     with patch(
         "anthropic.resources.Messages.create", side_effect=Exception("Test error")
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         with pytest.raises(Exception):
             client.messages.create(
                 model="claude-3-opus-20240229",
@@ -561,12 +561,12 @@ def test_cached_tokens(mock_client, mock_anthropic_response_with_cached_tokens):
         "anthropic.resources.Messages.create",
         return_value=mock_anthropic_response_with_cached_tokens,
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_anthropic_response_with_cached_tokens
@@ -600,7 +600,7 @@ def test_tool_definition(mock_client, mock_anthropic_response):
         "anthropic.resources.Messages.create",
         return_value=mock_anthropic_response,
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
 
         tools = [
             {
@@ -625,8 +625,8 @@ def test_tool_definition(mock_client, mock_anthropic_response):
             temperature=0.7,
             tools=tools,
             messages=[{"role": "user", "content": "hey"}],
-            posthog_distinct_id="test-id",
-            posthog_properties={"foo": "bar"},
+            insights_distinct_id="test-id",
+            insights_properties={"foo": "bar"},
         )
 
         assert response == mock_anthropic_response
@@ -662,7 +662,7 @@ def test_tool_calls_in_output_choices(
         "anthropic.resources.Messages.create",
         return_value=mock_anthropic_response_with_tool_calls,
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-5-sonnet-20241022",
             max_tokens=200,
@@ -680,7 +680,7 @@ def test_tool_calls_in_output_choices(
                     },
                 }
             ],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_anthropic_response_with_tool_calls
@@ -724,7 +724,7 @@ def test_tool_calls_only_no_content(
         "anthropic.resources.Messages.create",
         return_value=mock_anthropic_response_tool_calls_only,
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-5-sonnet-20241022",
             max_tokens=200,
@@ -743,7 +743,7 @@ def test_tool_calls_only_no_content(
                     },
                 }
             ],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_anthropic_response_tool_calls_only
@@ -790,7 +790,7 @@ def test_async_tool_calls_in_output_choices(
         "anthropic.resources.AsyncMessages.create",
         side_effect=mock_async_create,
     ):
-        async_client = AsyncAnthropic(api_key="test-key", posthog_client=mock_client)
+        async_client = AsyncAnthropic(api_key="test-key", insights_client=mock_client)
 
         async def run_test():
             return await async_client.messages.create(
@@ -810,7 +810,7 @@ def test_async_tool_calls_in_output_choices(
                         },
                     }
                 ],
-                posthog_distinct_id="test-id",
+                insights_distinct_id="test-id",
             )
 
         response = asyncio.run(run_test())
@@ -855,7 +855,7 @@ def test_streaming_with_tool_calls(mock_client, mock_anthropic_stream_with_tools
         "anthropic.resources.Messages.create",
         return_value=mock_anthropic_stream_with_tools,
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-5-sonnet-20241022",
             system="You are a helpful weather assistant.",
@@ -877,7 +877,7 @@ def test_streaming_with_tool_calls(mock_client, mock_anthropic_stream_with_tools
                 }
             ],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         # Consume the stream - this triggers the finally block synchronously
@@ -977,7 +977,7 @@ def test_async_streaming_with_tool_calls(mock_client, mock_anthropic_stream_with
         "anthropic.resources.AsyncMessages.create",
         side_effect=mock_async_create,
     ):
-        async_client = AsyncAnthropic(api_key="test-key", posthog_client=mock_client)
+        async_client = AsyncAnthropic(api_key="test-key", insights_client=mock_client)
 
         async def run_test():
             response = await async_client.messages.create(
@@ -1001,7 +1001,7 @@ def test_async_streaming_with_tool_calls(mock_client, mock_anthropic_stream_with
                     }
                 ],
                 stream=True,
-                posthog_distinct_id="test-id",
+                insights_distinct_id="test-id",
             )
 
             # Consume the async stream
@@ -1101,11 +1101,11 @@ def test_web_search_count(mock_client):
     mock_response = MockResponseWithWebSearch()
 
     with patch("anthropic.resources.Messages.create", return_value=mock_response):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Search for recent news"}],
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         assert response == mock_response
@@ -1179,12 +1179,12 @@ def test_streaming_with_web_search(mock_client, mock_anthropic_stream_with_web_s
         "anthropic.resources.Messages.create",
         return_value=mock_anthropic_stream_with_web_search,
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Search for recent news"}],
             stream=True,
-            posthog_distinct_id="test-id",
+            insights_distinct_id="test-id",
         )
 
         # Consume the stream - this triggers the finally block synchronously
@@ -1234,13 +1234,13 @@ def test_async_with_web_search(mock_client):
         "anthropic.resources.AsyncMessages.create",
         side_effect=mock_async_create,
     ):
-        async_client = AsyncAnthropic(api_key="test-key", posthog_client=mock_client)
+        async_client = AsyncAnthropic(api_key="test-key", insights_client=mock_client)
 
         async def run_test():
             response = await async_client.messages.create(
                 model="claude-3-opus-20240229",
                 messages=[{"role": "user", "content": "Search for recent news"}],
-                posthog_distinct_id="test-id",
+                insights_distinct_id="test-id",
             )
             return response
 
@@ -1278,14 +1278,14 @@ def test_async_streaming_with_web_search(
         "anthropic.resources.AsyncMessages.create",
         side_effect=mock_async_create,
     ):
-        async_client = AsyncAnthropic(api_key="test-key", posthog_client=mock_client)
+        async_client = AsyncAnthropic(api_key="test-key", insights_client=mock_client)
 
         async def run_test():
             response = await async_client.messages.create(
                 model="claude-3-opus-20240229",
                 messages=[{"role": "user", "content": "Search for recent news"}],
                 stream=True,
-                posthog_distinct_id="test-id",
+                insights_distinct_id="test-id",
             )
 
             # Consume the async stream
@@ -1318,11 +1318,11 @@ def test_no_distinct_id_uses_trace_id_and_personless(
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_trace_id="trace-123",
+            insights_trace_id="trace-123",
         )
 
         call_args = mock_client.capture.call_args[1]
@@ -1335,16 +1335,16 @@ def test_no_distinct_id_uses_trace_id_and_personless(
 def test_explicit_distinct_id_creates_person_profile(
     mock_client, mock_anthropic_response
 ):
-    """When posthog_distinct_id is explicitly passed, it is used and event is not personless."""
+    """When insights_distinct_id is explicitly passed, it is used and event is not personless."""
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{"role": "user", "content": "Hello"}],
-            posthog_distinct_id="user-123",
-            posthog_trace_id="trace-123",
+            insights_distinct_id="user-123",
+            insights_trace_id="trace-123",
         )
 
         call_args = mock_client.capture.call_args[1]
@@ -1362,13 +1362,13 @@ def test_outer_context_distinct_id_is_used(mock_client, mock_anthropic_response)
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         with new_context():
             identify_context("outer-user-456")
             client.messages.create(
                 model="claude-3-opus-20240229",
                 messages=[{"role": "user", "content": "Hello"}],
-                posthog_trace_id="trace-123",
+                insights_trace_id="trace-123",
             )
 
         call_args = mock_client.capture.call_args[1]
@@ -1384,18 +1384,18 @@ def test_outer_context_distinct_id_is_used(mock_client, mock_anthropic_response)
 def test_explicit_distinct_id_overrides_outer_context(
     mock_client, mock_anthropic_response
 ):
-    """When both outer context and explicit posthog_distinct_id are set, explicit wins."""
+    """When both outer context and explicit insights_distinct_id are set, explicit wins."""
     with patch(
         "anthropic.resources.Messages.create", return_value=mock_anthropic_response
     ):
-        client = Anthropic(api_key="test-key", posthog_client=mock_client)
+        client = Anthropic(api_key="test-key", insights_client=mock_client)
         with new_context():
             identify_context("outer-user-456")
             client.messages.create(
                 model="claude-3-opus-20240229",
                 messages=[{"role": "user", "content": "Hello"}],
-                posthog_distinct_id="explicit-user-789",
-                posthog_trace_id="trace-123",
+                insights_distinct_id="explicit-user-789",
+                insights_trace_id="trace-123",
             )
 
         call_args = mock_client.capture.call_args[1]

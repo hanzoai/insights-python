@@ -25,20 +25,20 @@ class InsightsContextMiddleware:
     """Middleware to automatically track Django requests.
 
     This middleware wraps all calls with an Insights context. It attempts to extract the following from the request headers:
-    - Session ID, (extracted from `X-INSIGHTS-SESSION-ID` or `X-POSTHOG-SESSION-ID`)
-    - Distinct ID, (extracted from `X-INSIGHTS-DISTINCT-ID` or `X-POSTHOG-DISTINCT-ID`)
+    - Session ID, (extracted from `X-INSIGHTS-SESSION-ID`)
+    - Distinct ID, (extracted from `X-INSIGHTS-DISTINCT-ID`)
     - Request URL as $current_url
     - Request Method as $request_method
 
     The context will also auto-capture exceptions and send them to Insights, unless you disable it by setting
-    `INSIGHTS_MW_CAPTURE_EXCEPTIONS` (or `POSTHOG_MW_CAPTURE_EXCEPTIONS`) to `False` in your Django settings.
+    `INSIGHTS_MW_CAPTURE_EXCEPTIONS` to `False` in your Django settings.
     The exceptions are captured using the global client, unless the setting `INSIGHTS_MW_CLIENT`
-    (or `POSTHOG_MW_CLIENT`) is set to a custom client instance.
+    is set to a custom client instance.
 
     The middleware behaviour is customisable through 3 additional functions:
-    - `INSIGHTS_MW_EXTRA_TAGS` (or `POSTHOG_MW_EXTRA_TAGS`), which is a Callable[[HttpRequest], Dict[str, Any]] expected to return a dictionary of additional tags to be added to the context.
-    - `INSIGHTS_MW_REQUEST_FILTER` (or `POSTHOG_MW_REQUEST_FILTER`), which is a Callable[[HttpRequest], bool] expected to return `False` if the request should not be tracked.
-    - `INSIGHTS_MW_TAG_MAP` (or `POSTHOG_MW_TAG_MAP`), which is a Callable[[Dict[str, Any]], Dict[str, Any]], which you can use to modify the tags before they're added to the context.
+    - `INSIGHTS_MW_EXTRA_TAGS`, which is a Callable[[HttpRequest], Dict[str, Any]] expected to return a dictionary of additional tags to be added to the context.
+    - `INSIGHTS_MW_REQUEST_FILTER`, which is a Callable[[HttpRequest], bool] expected to return `False` if the request should not be tracked.
+    - `INSIGHTS_MW_TAG_MAP`, which is a Callable[[Dict[str, Any]], Dict[str, Any]], which you can use to modify the tags before they're added to the context.
 
     You can use the `INSIGHTS_MW_TAG_MAP` function to remove any default tags you don't want to capture, or override them with your own values.
 
@@ -67,14 +67,10 @@ class InsightsContextMiddleware:
 
         from django.conf import settings
 
-        # Support both INSIGHTS_MW_* and legacy POSTHOG_MW_* setting names
         def _get_setting(name):
             insights_name = f"INSIGHTS_MW_{name}"
-            posthog_name = f"POSTHOG_MW_{name}"
             if hasattr(settings, insights_name):
                 return getattr(settings, insights_name)
-            if hasattr(settings, posthog_name):
-                return getattr(settings, posthog_name)
             return None
 
         extra_tags = _get_setting("EXTRA_TAGS")
@@ -131,13 +127,13 @@ class InsightsContextMiddleware:
         """
         tags = {}
 
-        # Extract session ID from X-INSIGHTS-SESSION-ID or X-POSTHOG-SESSION-ID header
-        session_id = request.headers.get("X-INSIGHTS-SESSION-ID") or request.headers.get("X-POSTHOG-SESSION-ID")
+        # Extract session ID from X-INSIGHTS-SESSION-ID header
+        session_id = request.headers.get("X-INSIGHTS-SESSION-ID")
         if session_id:
             contexts.set_context_session(session_id)
 
-        # Extract distinct ID from X-INSIGHTS-DISTINCT-ID or X-POSTHOG-DISTINCT-ID header or request user id
-        distinct_id = request.headers.get("X-INSIGHTS-DISTINCT-ID") or request.headers.get("X-POSTHOG-DISTINCT-ID") or user_id
+        # Extract distinct ID from X-INSIGHTS-DISTINCT-ID header or request user id
+        distinct_id = request.headers.get("X-INSIGHTS-DISTINCT-ID") or user_id
         if distinct_id:
             contexts.identify_context(distinct_id)
 
@@ -323,7 +319,3 @@ class InsightsContextMiddleware:
             from hanzo_insights import capture_exception
 
             capture_exception(exception)
-
-
-# Backward compatibility alias
-PosthogContextMiddleware = InsightsContextMiddleware

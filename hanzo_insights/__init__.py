@@ -892,7 +892,3 @@ class Insights(Client):
     """Hanzo Insights client for product analytics."""
 
     pass
-
-
-# Backward compatibility alias
-Posthog = Insights

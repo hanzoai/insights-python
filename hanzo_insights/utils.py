@@ -277,7 +277,7 @@ class FlagCache:
 
 class RedisFlagCache:
     def __init__(
-        self, redis_client, default_ttl=300, stale_ttl=3600, key_prefix="posthog:flags:"
+        self, redis_client, default_ttl=300, stale_ttl=3600, key_prefix="insights:flags:"
     ):
         self.redis = redis_client
         self.default_ttl = default_ttl

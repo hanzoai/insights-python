@@ -79,7 +79,7 @@ class GenerationMetadata(SpanMetadata):
     """Base URL of the provider's API used in the run."""
     tools: Optional[List[Dict[str, Any]]] = None
     """Tools provided to the model."""
-    posthog_properties: Optional[Dict[str, Any]] = None
+    insights_properties: Optional[Dict[str, Any]] = None
     """Insights properties of the run."""
 
 
@@ -423,7 +423,7 @@ class CallbackHandler(BaseCallbackHandler):
             if provider := metadata.get("ls_provider"):
                 generation.provider = provider
 
-            generation.posthog_properties = metadata.get("posthog_properties")
+            generation.insights_properties = metadata.get("insights_properties")
         try:
             base_url = serialized["kwargs"]["openai_api_base"]
             if base_url is not None:
@@ -578,8 +578,8 @@ class CallbackHandler(BaseCallbackHandler):
             "$ai_framework": "langchain",
         }
 
-        if isinstance(run.posthog_properties, dict):
-            event_properties.update(run.posthog_properties)
+        if isinstance(run.insights_properties, dict):
+            event_properties.update(run.insights_properties)
 
         if run.tools:
             event_properties["$ai_tools"] = run.tools

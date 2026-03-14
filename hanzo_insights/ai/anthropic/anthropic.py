@@ -34,14 +34,14 @@ class Anthropic(anthropic.Anthropic):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
-            posthog_client: Insights client for tracking usage
+            insights_client: Insights client for tracking usage
             **kwargs: Additional arguments passed to the Anthropic client
         """
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
         self.messages = WrappedMessages(self)
 
 
@@ -50,46 +50,46 @@ class WrappedMessages(Messages):
 
     def create(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
         """
         Create a message using Anthropic's API while tracking usage in Insights.
 
         Args:
-            posthog_distinct_id: Optional ID to associate with the usage event
-            posthog_trace_id: Optional trace UUID for linking events
-            posthog_properties: Optional dictionary of extra properties to include in the event
-            posthog_privacy_mode: Whether to redact sensitive information in tracking
-            posthog_groups: Optional group analytics properties
+            insights_distinct_id: Optional ID to associate with the usage event
+            insights_trace_id: Optional trace UUID for linking events
+            insights_properties: Optional dictionary of extra properties to include in the event
+            insights_privacy_mode: Whether to redact sensitive information in tracking
+            insights_groups: Optional group analytics properties
             **kwargs: Arguments passed to Anthropic's messages.create
         """
 
-        if posthog_trace_id is None:
-            posthog_trace_id = str(uuid.uuid4())
+        if insights_trace_id is None:
+            insights_trace_id = str(uuid.uuid4())
 
         if kwargs.get("stream", False):
             return self._create_streaming(
-                posthog_distinct_id,
-                posthog_trace_id,
-                posthog_properties,
-                posthog_privacy_mode,
-                posthog_groups,
+                insights_distinct_id,
+                insights_trace_id,
+                insights_properties,
+                insights_privacy_mode,
+                insights_groups,
                 **kwargs,
             )
 
         return call_llm_and_track_usage(
-            posthog_distinct_id,
+            insights_distinct_id,
             self._client._ph_client,
             "anthropic",
-            posthog_trace_id,
-            posthog_properties,
-            posthog_privacy_mode,
-            posthog_groups,
+            insights_trace_id,
+            insights_properties,
+            insights_privacy_mode,
+            insights_groups,
             self._client.base_url,
             super().create,
             **kwargs,
@@ -97,32 +97,32 @@ class WrappedMessages(Messages):
 
     def stream(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
-        if posthog_trace_id is None:
-            posthog_trace_id = str(uuid.uuid4())
+        if insights_trace_id is None:
+            insights_trace_id = str(uuid.uuid4())
 
         return self._create_streaming(
-            posthog_distinct_id,
-            posthog_trace_id,
-            posthog_properties,
-            posthog_privacy_mode,
-            posthog_groups,
+            insights_distinct_id,
+            insights_trace_id,
+            insights_properties,
+            insights_privacy_mode,
+            insights_groups,
             **kwargs,
         )
 
     def _create_streaming(
         self,
-        posthog_distinct_id: Optional[str],
-        posthog_trace_id: Optional[str],
-        posthog_properties: Optional[Dict[str, Any]],
-        posthog_privacy_mode: bool,
-        posthog_groups: Optional[Dict[str, Any]],
+        insights_distinct_id: Optional[str],
+        insights_trace_id: Optional[str],
+        insights_properties: Optional[Dict[str, Any]],
+        insights_privacy_mode: bool,
+        insights_groups: Optional[Dict[str, Any]],
         **kwargs: Any,
     ):
         start_time = time.time()
@@ -188,11 +188,11 @@ class WrappedMessages(Messages):
                 latency = end_time - start_time
 
                 self._capture_streaming_event(
-                    posthog_distinct_id,
-                    posthog_trace_id,
-                    posthog_properties,
-                    posthog_privacy_mode,
-                    posthog_groups,
+                    insights_distinct_id,
+                    insights_trace_id,
+                    insights_properties,
+                    insights_privacy_mode,
+                    insights_groups,
                     kwargs,
                     usage_stats,
                     latency,
@@ -204,11 +204,11 @@ class WrappedMessages(Messages):
 
     def _capture_streaming_event(
         self,
-        posthog_distinct_id: Optional[str],
-        posthog_trace_id: Optional[str],
-        posthog_properties: Optional[Dict[str, Any]],
-        posthog_privacy_mode: bool,
-        posthog_groups: Optional[Dict[str, Any]],
+        insights_distinct_id: Optional[str],
+        insights_trace_id: Optional[str],
+        insights_properties: Optional[Dict[str, Any]],
+        insights_privacy_mode: bool,
+        insights_groups: Optional[Dict[str, Any]],
         kwargs: Dict[str, Any],
         usage_stats: TokenUsage,
         latency: float,
@@ -237,11 +237,11 @@ class WrappedMessages(Messages):
             ),
             usage_stats=usage_stats,
             latency=latency,
-            distinct_id=posthog_distinct_id,
-            trace_id=posthog_trace_id,
-            properties=posthog_properties,
-            privacy_mode=posthog_privacy_mode,
-            groups=posthog_groups,
+            distinct_id=insights_distinct_id,
+            trace_id=insights_trace_id,
+            properties=insights_properties,
+            privacy_mode=insights_privacy_mode,
+            groups=insights_groups,
         )
 
         # Use the common capture function
