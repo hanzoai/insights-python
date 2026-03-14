@@ -1,10 +1,10 @@
 import unittest
 
-from posthog import Posthog
+from hanzo_insights import Insights
 
 
 class TestModule(unittest.TestCase):
-    posthog = None
+    client = None
 
     def _assert_enqueue_result(self, result):
         self.assertEqual(type(result[0]), str)
@@ -14,19 +14,19 @@ class TestModule(unittest.TestCase):
 
     def setUp(self):
         self.failed = False
-        self.posthog = Posthog(
+        self.client = Insights(
             "testsecret", host="http://localhost:8000", on_error=self.failed
         )
 
     def test_track(self):
-        res = self.hanzo_insights.capture("python module event", distinct_id="distinct_id")
+        res = self.client.capture("python module event", distinct_id="distinct_id")
         self._assert_enqueue_result(res)
-        self.hanzo_insights.flush()
+        self.client.flush()
 
     def test_alias(self):
-        res = self.hanzo_insights.alias("previousId", "distinct_id")
+        res = self.client.alias("previousId", "distinct_id")
         self._assert_enqueue_result(res)
-        self.hanzo_insights.flush()
+        self.client.flush()
 
     def test_flush(self):
-        self.hanzo_insights.flush()
+        self.client.flush()

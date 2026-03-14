@@ -20,7 +20,7 @@ from agents.tracing.span_data import (
     TranscriptionSpanData,
 )
 
-from posthog import setup
+from hanzo_insights import setup
 from hanzo_insights.client import Client
 
 log = logging.getLogger("hanzo_insights")
@@ -53,27 +53,27 @@ def _parse_iso_timestamp(iso_str: Optional[str]) -> Optional[float]:
         return None
 
 
-class PostHogTracingProcessor(TracingProcessor):
+class InsightsTracingProcessor(TracingProcessor):
     """
-    A tracing processor that sends OpenAI Agents SDK traces to PostHog.
+    A tracing processor that sends OpenAI Agents SDK traces to Hanzo Insights.
 
     This processor implements the TracingProcessor interface from the OpenAI Agents SDK
-    and maps agent traces, spans, and generations to PostHog's LLM analytics events.
+    and maps agent traces, spans, and generations to Insights LLM analytics events.
 
     Example:
         ```python
         from agents import Agent, Runner
         from agents.tracing import add_trace_processor
-        from hanzo_insights.ai.openai_agents import PostHogTracingProcessor
+        from hanzo_insights.ai.openai_agents import InsightsTracingProcessor
 
         # Create and register the processor
-        processor = PostHogTracingProcessor(
+        processor = InsightsTracingProcessor(
             distinct_id="user@example.com",
             privacy_mode=False,
         )
         add_trace_processor(processor)
 
-        # Run agents as normal - traces automatically sent to PostHog
+        # Run agents as normal - traces automatically sent to Insights
         agent = Agent(name="Assistant", instructions="You are helpful.")
         result = Runner.run_sync(agent, "Hello!")
         ```
@@ -88,14 +88,14 @@ class PostHogTracingProcessor(TracingProcessor):
         properties: Optional[Dict[str, Any]] = None,
     ):
         """
-        Initialize the PostHog tracing processor.
+        Initialize the Insights tracing processor.
 
         Args:
-            client: Optional PostHog client instance. If not provided, uses the default client.
+            client: Optional Insights client instance. If not provided, uses the default client.
             distinct_id: Either a string distinct ID or a callable that takes a Trace
                 and returns a distinct ID. If not provided, uses the trace_id.
             privacy_mode: If True, redacts input/output content from events.
-            groups: Optional PostHog groups to associate with all events.
+            groups: Optional Insights groups to associate with all events.
             properties: Optional additional properties to include with all events.
         """
         self._client = client or setup()
@@ -173,7 +173,7 @@ class PostHogTracingProcessor(TracingProcessor):
         properties: Dict[str, Any],
         distinct_id: Optional[str] = None,
     ) -> None:
-        """Capture an event to PostHog with error handling.
+        """Capture an event to Insights with error handling.
 
         Args:
             distinct_id: The resolved distinct ID. When the user didn't provide
@@ -199,7 +199,7 @@ class PostHogTracingProcessor(TracingProcessor):
                 groups=self._groups,
             )
         except Exception as e:
-            log.debug(f"Failed to capture PostHog event: {e}")
+            log.debug(f"Failed to capture Insights event: {e}")
 
     def on_trace_start(self, trace: Trace) -> None:
         """Called when a new trace begins. Stores metadata for spans; the $ai_trace event is emitted in on_trace_end."""
@@ -848,7 +848,7 @@ class PostHogTracingProcessor(TracingProcessor):
             self._span_start_times.clear()
             self._trace_metadata.clear()
 
-            # Flush the PostHog client if possible
+            # Flush the Insights client if possible
             if hasattr(self._client, "flush") and callable(self._client.flush):
                 self._client.flush()
         except Exception as e:
@@ -861,3 +861,7 @@ class PostHogTracingProcessor(TracingProcessor):
                 self._client.flush()
         except Exception as e:
             log.debug(f"Error in force_flush: {e}")
+
+
+# Backward compatibility alias
+PostHogTracingProcessor = InsightsTracingProcessor

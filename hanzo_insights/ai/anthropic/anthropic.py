@@ -23,21 +23,21 @@ from hanzo_insights.ai.anthropic.anthropic_converter import (
     finalize_anthropic_tool_input,
 )
 from hanzo_insights.ai.sanitization import sanitize_anthropic
-from hanzo_insights.client import Client as PostHogClient
-from posthog import setup
+from hanzo_insights.client import Client as InsightsClient
+from hanzo_insights import setup
 
 
 class Anthropic(anthropic.Anthropic):
     """
-    A wrapper around the Anthropic SDK that automatically sends LLM usage events to PostHog.
+    A wrapper around the Anthropic SDK that automatically sends LLM usage events to Insights.
     """
 
-    _ph_client: PostHogClient
+    _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[PostHogClient] = None, **kwargs):
+    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
-            posthog_client: PostHog client for tracking usage
+            posthog_client: Insights client for tracking usage
             **kwargs: Additional arguments passed to the Anthropic client
         """
         super().__init__(**kwargs)
@@ -58,7 +58,7 @@ class WrappedMessages(Messages):
         **kwargs: Any,
     ):
         """
-        Create a message using Anthropic's API while tracking usage in PostHog.
+        Create a message using Anthropic's API while tracking usage in Insights.
 
         Args:
             posthog_distinct_id: Optional ID to associate with the usage event

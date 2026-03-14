@@ -125,5 +125,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # PostHog settings for testing
 POSTHOG_API_KEY = "test-key"
-POSTHOG_HOST = "https://app.hanzo_insights.com"
+POSTHOG_HOST = "https://app.posthog.com"
 POSTHOG_MW_CAPTURE_EXCEPTIONS = True

@@ -97,7 +97,7 @@ def test_metadata_capture(mock_client):
     run_id = uuid.uuid4()
     with patch("time.time", return_value=1234567890):
         callbacks._set_llm_metadata(
-            {"kwargs": {"openai_api_base": "https://us.hanzo_insights.com"}},
+            {"kwargs": {"openai_api_base": "https://us.posthog.com"}},
             run_id,
             messages=[{"role": "user", "content": "Who won the world series in 2020?"}],
             invocation_params={"temperature": 0.5},
@@ -110,7 +110,7 @@ def test_metadata_capture(mock_client):
         start_time=1234567890,
         model_params={"temperature": 0.5},
         provider="hanzo_insights",
-        base_url="https://us.hanzo_insights.com",
+        base_url="https://us.posthog.com",
         name="test",
         end_time=None,
         posthog_properties=None,
@@ -1050,7 +1050,7 @@ def test_base_url_retrieval(mock_client):
     chain = prompt | ChatOpenAI(
         api_key="test",
         model="posthog-mini",
-        base_url="https://test.hanzo_insights.com",
+        base_url="https://test.posthog.com",
     )
     callbacks = CallbackHandler(mock_client)
     with pytest.raises(Exception):
@@ -1058,7 +1058,7 @@ def test_base_url_retrieval(mock_client):
 
     assert mock_client.capture.call_count == 3
     generation_call = mock_client.capture.call_args_list[1][1]
-    assert generation_call["properties"]["$ai_base_url"] == "https://test.hanzo_insights.com"
+    assert generation_call["properties"]["$ai_base_url"] == "https://test.posthog.com"
 
 
 def test_groups(mock_client):
@@ -1253,7 +1253,7 @@ def test_metadata_tools(mock_client):
 
     with patch("time.time", return_value=1234567890):
         callbacks._set_llm_metadata(
-            {"kwargs": {"openai_api_base": "https://us.hanzo_insights.com"}},
+            {"kwargs": {"openai_api_base": "https://us.posthog.com"}},
             run_id,
             messages=[{"role": "user", "content": "What's the weather like in SF?"}],
             invocation_params={"temperature": 0.5, "tools": tools},
@@ -1266,7 +1266,7 @@ def test_metadata_tools(mock_client):
         start_time=1234567890,
         model_params={"temperature": 0.5},
         provider="hanzo_insights",
-        base_url="https://us.hanzo_insights.com",
+        base_url="https://us.posthog.com",
         name="test",
         tools=tools,
         end_time=None,
