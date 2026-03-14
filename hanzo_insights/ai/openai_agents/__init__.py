@@ -14,9 +14,9 @@ except ImportError:
         "Please install the OpenAI Agents SDK to use this feature: 'pip install openai-agents'"
     )
 
-from hanzo_insights.ai.openai_agents.processor import InsightsTracingProcessor, PostHogTracingProcessor
+from hanzo_insights.ai.openai_agents.processor import InsightsTracingProcessor
 
-__all__ = ["InsightsTracingProcessor", "PostHogTracingProcessor", "instrument"]
+__all__ = ["InsightsTracingProcessor", "instrument"]
 
 
 def instrument(

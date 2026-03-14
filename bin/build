@@ -4,5 +4,5 @@
 source bin/helpers/_utils.sh
 set_source_and_root_dir
 
-flake8 posthog --ignore E501,W503
+flake8 hanzo_insights --ignore E501,W503
 mypy --no-site-packages --config-file mypy.ini . | mypy-baseline filter

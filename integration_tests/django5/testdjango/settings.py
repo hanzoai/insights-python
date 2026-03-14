@@ -47,7 +47,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "hanzo_insights.integrations.django.PosthogContextMiddleware",  # Test PostHog middleware
+    "hanzo_insights.integrations.django.InsightsContextMiddleware",  # Test Insights middleware
 ]
 
 ROOT_URLCONF = "testdjango.urls"
@@ -123,7 +123,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# PostHog settings for testing
-POSTHOG_API_KEY = "test-key"
+# Insights settings for testing
+INSIGHTS_API_KEY = "test-key"
 POSTHOG_HOST = "https://app.posthog.com"
-POSTHOG_MW_CAPTURE_EXCEPTIONS = True
+INSIGHTS_MW_CAPTURE_EXCEPTIONS = True

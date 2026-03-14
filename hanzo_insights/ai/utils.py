@@ -26,10 +26,10 @@ _TOKEN_PROPERTY_KEYS = frozenset(
 
 
 def _get_tokens_source(
-    sdk_tags: Dict[str, Any], posthog_properties: Optional[Dict[str, Any]]
+    sdk_tags: Dict[str, Any], insights_properties: Optional[Dict[str, Any]]
 ) -> str:
-    if posthog_properties and any(
-        key in posthog_properties for key in _TOKEN_PROPERTY_KEYS
+    if insights_properties and any(
+        key in insights_properties for key in _TOKEN_PROPERTY_KEYS
     ):
         return "passthrough"
     return "sdk"
@@ -319,13 +319,13 @@ def merge_system_prompt(
 
 
 def call_llm_and_track_usage(
-    posthog_distinct_id: Optional[str],
+    insights_distinct_id: Optional[str],
     ph_client: InsightsClient,
     provider: str,
-    posthog_trace_id: Optional[str],
-    posthog_properties: Optional[Dict[str, Any]],
-    posthog_privacy_mode: bool,
-    posthog_groups: Optional[Dict[str, Any]],
+    insights_trace_id: Optional[str],
+    insights_properties: Optional[Dict[str, Any]],
+    insights_privacy_mode: bool,
+    insights_groups: Optional[Dict[str, Any]],
     base_url: str,
     call_method: Callable[..., Any],
     **kwargs: Any,
@@ -342,8 +342,8 @@ def call_llm_and_track_usage(
     error_params: Dict[str, Any] = {}
 
     with new_context(client=ph_client, capture_exceptions=False):
-        if posthog_distinct_id:
-            identify_context(posthog_distinct_id)
+        if insights_distinct_id:
+            identify_context(insights_distinct_id)
 
         try:
             response = call_method(**kwargs)
@@ -363,18 +363,18 @@ def call_llm_and_track_usage(
             end_time = time.time()
             latency = end_time - start_time
 
-            if posthog_trace_id is None:
-                posthog_trace_id = str(uuid.uuid4())
+            if insights_trace_id is None:
+                insights_trace_id = str(uuid.uuid4())
 
             # Check if we have a real user distinct_id (from param or outer context)
             has_person_distinct_id = (
-                posthog_distinct_id is not None
+                insights_distinct_id is not None
                 or contexts.get_context_distinct_id() is not None
             )
 
             if not has_person_distinct_id:
                 # Fall back to trace_id as distinct_id when no real user id is available.
-                identify_context(posthog_trace_id)
+                identify_context(insights_trace_id)
 
             if response and (
                 hasattr(response, "usage")
@@ -390,19 +390,19 @@ def call_llm_and_track_usage(
             tag("$ai_model_parameters", get_model_params(kwargs))
             tag(
                 "$ai_input",
-                with_privacy_mode(ph_client, posthog_privacy_mode, sanitized_messages),
+                with_privacy_mode(ph_client, insights_privacy_mode, sanitized_messages),
             )
             tag(
                 "$ai_output_choices",
                 with_privacy_mode(
-                    ph_client, posthog_privacy_mode, format_response(response, provider)
+                    ph_client, insights_privacy_mode, format_response(response, provider)
                 ),
             )
             tag("$ai_http_status", http_status)
             tag("$ai_input_tokens", usage.get("input_tokens", 0))
             tag("$ai_output_tokens", usage.get("output_tokens", 0))
             tag("$ai_latency", latency)
-            tag("$ai_trace_id", posthog_trace_id)
+            tag("$ai_trace_id", insights_trace_id)
             tag("$ai_base_url", str(base_url))
 
             available_tool_calls = extract_available_tool_calls(provider, kwargs)
@@ -439,26 +439,26 @@ def call_llm_and_track_usage(
                 tag(
                     "$ai_instructions",
                     with_privacy_mode(
-                        ph_client, posthog_privacy_mode, kwargs.get("instructions")
+                        ph_client, insights_privacy_mode, kwargs.get("instructions")
                     ),
                 )
 
-            # send the event to posthog
+            # send the event to Insights
             if hasattr(ph_client, "capture") and callable(ph_client.capture):
                 sdk_tags = get_tags()
                 merged_properties = {
                     **sdk_tags,
-                    **(posthog_properties or {}),
+                    **(insights_properties or {}),
                     **(error_params or {}),
                 }
                 merged_properties["$ai_tokens_source"] = _get_tokens_source(
-                    sdk_tags, posthog_properties
+                    sdk_tags, insights_properties
                 )
                 ph_client.capture(
                     distinct_id=contexts.get_context_distinct_id(),
                     event="$ai_generation",
                     properties=merged_properties,
-                    groups=posthog_groups,
+                    groups=insights_groups,
                 )
 
         if error:
@@ -468,13 +468,13 @@ def call_llm_and_track_usage(
 
 
 async def call_llm_and_track_usage_async(
-    posthog_distinct_id: Optional[str],
+    insights_distinct_id: Optional[str],
     ph_client: InsightsClient,
     provider: str,
-    posthog_trace_id: Optional[str],
-    posthog_properties: Optional[Dict[str, Any]],
-    posthog_privacy_mode: bool,
-    posthog_groups: Optional[Dict[str, Any]],
+    insights_trace_id: Optional[str],
+    insights_properties: Optional[Dict[str, Any]],
+    insights_privacy_mode: bool,
+    insights_groups: Optional[Dict[str, Any]],
     base_url: str,
     call_async_method: Callable[..., Any],
     **kwargs: Any,
@@ -487,8 +487,8 @@ async def call_llm_and_track_usage_async(
     error_params: Dict[str, Any] = {}
 
     with new_context(client=ph_client, capture_exceptions=False):
-        if posthog_distinct_id:
-            identify_context(posthog_distinct_id)
+        if insights_distinct_id:
+            identify_context(insights_distinct_id)
 
         try:
             response = await call_async_method(**kwargs)
@@ -508,18 +508,18 @@ async def call_llm_and_track_usage_async(
             end_time = time.time()
             latency = end_time - start_time
 
-            if posthog_trace_id is None:
-                posthog_trace_id = str(uuid.uuid4())
+            if insights_trace_id is None:
+                insights_trace_id = str(uuid.uuid4())
 
             # Check if we have a real user distinct_id (from param or outer context)
             has_person_distinct_id = (
-                posthog_distinct_id is not None
+                insights_distinct_id is not None
                 or contexts.get_context_distinct_id() is not None
             )
 
             if not has_person_distinct_id:
                 # Fall back to trace_id as distinct_id when no real user id is available.
-                identify_context(posthog_trace_id)
+                identify_context(insights_trace_id)
 
             if response and (
                 hasattr(response, "usage")
@@ -535,19 +535,19 @@ async def call_llm_and_track_usage_async(
             tag("$ai_model_parameters", get_model_params(kwargs))
             tag(
                 "$ai_input",
-                with_privacy_mode(ph_client, posthog_privacy_mode, sanitized_messages),
+                with_privacy_mode(ph_client, insights_privacy_mode, sanitized_messages),
             )
             tag(
                 "$ai_output_choices",
                 with_privacy_mode(
-                    ph_client, posthog_privacy_mode, format_response(response, provider)
+                    ph_client, insights_privacy_mode, format_response(response, provider)
                 ),
             )
             tag("$ai_http_status", http_status)
             tag("$ai_input_tokens", usage.get("input_tokens", 0))
             tag("$ai_output_tokens", usage.get("output_tokens", 0))
             tag("$ai_latency", latency)
-            tag("$ai_trace_id", posthog_trace_id)
+            tag("$ai_trace_id", insights_trace_id)
             tag("$ai_base_url", str(base_url))
 
             available_tool_calls = extract_available_tool_calls(provider, kwargs)
@@ -584,26 +584,26 @@ async def call_llm_and_track_usage_async(
                 tag(
                     "$ai_instructions",
                     with_privacy_mode(
-                        ph_client, posthog_privacy_mode, kwargs.get("instructions")
+                        ph_client, insights_privacy_mode, kwargs.get("instructions")
                     ),
                 )
 
-            # send the event to posthog
+            # send the event to Insights
             if hasattr(ph_client, "capture") and callable(ph_client.capture):
                 sdk_tags = get_tags()
                 merged_properties = {
                     **sdk_tags,
-                    **(posthog_properties or {}),
+                    **(insights_properties or {}),
                     **(error_params or {}),
                 }
                 merged_properties["$ai_tokens_source"] = _get_tokens_source(
-                    sdk_tags, posthog_properties
+                    sdk_tags, insights_properties
                 )
                 ph_client.capture(
                     distinct_id=contexts.get_context_distinct_id(),
                     event="$ai_generation",
                     properties=merged_properties,
-                    groups=posthog_groups,
+                    groups=insights_groups,
                 )
 
         if error:

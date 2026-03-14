@@ -28,16 +28,16 @@ class AzureOpenAI(openai.AzureOpenAI):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: Azure OpenAI API key.
-            posthog_client: If provided, events will be captured via this client instead
+            insights_client: If provided, events will be captured via this client instead
                             of the global hanzo_insights.
             **openai_config: Any additional keyword args to set on Azure OpenAI (e.g. azure_endpoint="xxx").
         """
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
 
         # Store original objects after parent initialization (only if they exist)
         self._original_chat = getattr(self, "chat", None)
@@ -66,16 +66,16 @@ class AsyncAzureOpenAI(openai.AsyncAzureOpenAI):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: Azure OpenAI API key.
-            posthog_client: If provided, events will be captured via this client instead
+            insights_client: If provided, events will be captured via this client instead
                             of the global hanzo_insights.
             **openai_config: Any additional keyword args to set on Azure OpenAI (e.g. azure_endpoint="xxx").
         """
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
 
         # Store original objects after parent initialization (only if they exist)
         self._original_chat = getattr(self, "chat", None)

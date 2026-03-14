@@ -32,13 +32,13 @@ class TestPrompts(unittest.TestCase):
         "deleted": False,
     }
 
-    def create_mock_posthog(
+    def create_mock_client(
         self,
         personal_api_key="phx_test_key",
         project_api_key="phc_test_key",
-        host="https://us.posthog.com",
+        host="https://us.insights.hanzo.ai",
     ):
-        """Create a mock PostHog client."""
+        """Create a mock Insights client."""
         mock = MagicMock()
         mock.personal_api_key = personal_api_key
         mock.api_key = project_api_key
@@ -55,8 +55,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.get("test-prompt")
 
@@ -65,7 +65,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key",
+            "https://us.insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key",
         )
         self.assertIn("Authorization", call_args[1]["headers"])
         self.assertEqual(
@@ -83,8 +83,8 @@ class TestPromptsGet(TestPrompts):
         }
         mock_get.return_value = MockResponse(json_data=versioned_prompt_response)
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.get("test-prompt", version=1)
 
@@ -93,7 +93,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key&version=1",
+            "https://us.insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key&version=1",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
@@ -104,8 +104,8 @@ class TestPromptsGet(TestPrompts):
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
         mock_time.return_value = 1000.0
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         # First call - fetches from API
         result1 = prompts.get("test-prompt", cache_ttl_seconds=300)
@@ -140,8 +140,8 @@ class TestPromptsGet(TestPrompts):
             MockResponse(json_data=versioned_prompt_response),
         ]
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         self.assertEqual(prompts.get("test-prompt"), latest_prompt_response["prompt"])
         self.assertEqual(
@@ -171,8 +171,8 @@ class TestPromptsGet(TestPrompts):
         ]
         mock_time.return_value = 1000.0
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         # First call - fetches from API
         result1 = prompts.get("test-prompt", cache_ttl_seconds=60)
@@ -201,8 +201,8 @@ class TestPromptsGet(TestPrompts):
         ]
         mock_time.return_value = 1000.0
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         # First call - populates cache
         result1 = prompts.get("test-prompt", cache_ttl_seconds=60)
@@ -229,8 +229,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.side_effect = Exception("Network error")
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         fallback = "Default system prompt."
         result = prompts.get("test-prompt", fallback=fallback)
@@ -248,8 +248,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.side_effect = Exception("Network error")
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("test-prompt")
@@ -262,8 +262,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(status_code=404, ok=False)
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("nonexistent-prompt")
@@ -276,8 +276,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(status_code=404, ok=False)
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("nonexistent-prompt", version=3)
@@ -293,8 +293,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(status_code=403, ok=False)
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("restricted-prompt")
@@ -305,8 +305,8 @@ class TestPromptsGet(TestPrompts):
 
     def test_throw_when_no_personal_api_key_configured(self):
         """Should throw when no personal_api_key is configured."""
-        posthog = self.create_mock_posthog(personal_api_key=None)
-        prompts = Prompts(posthog)
+        client = self.create_mock_client(personal_api_key=None)
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("test-prompt")
@@ -317,8 +317,8 @@ class TestPromptsGet(TestPrompts):
 
     def test_throw_when_no_project_api_key_configured(self):
         """Should throw when no project_api_key is configured."""
-        posthog = self.create_mock_posthog(project_api_key=None)
-        prompts = Prompts(posthog)
+        client = self.create_mock_client(project_api_key=None)
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("test-prompt")
@@ -333,8 +333,8 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(json_data={"invalid": "response"})
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         with self.assertRaises(Exception) as context:
             prompts.get("test-prompt")
@@ -342,22 +342,22 @@ class TestPromptsGet(TestPrompts):
         self.assertIn("Invalid response format", str(context.exception))
 
     @patch("hanzo_insights.ai.prompts._get_session")
-    def test_use_custom_host_from_posthog_options(self, mock_get_session):
-        """Should use custom host from PostHog options."""
+    def test_use_custom_host_from_insights_options(self, mock_get_session):
+        """Should use custom host from Insights options."""
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
 
-        posthog = self.create_mock_posthog(host="https://eu.posthog.com")
-        prompts = Prompts(posthog)
+        client = self.create_mock_client(host="https://eu.insights.hanzo.ai")
+        prompts = Prompts(client)
 
         prompts.get("test-prompt")
 
         call_args = mock_get.call_args
         self.assertTrue(
             call_args[0][0].startswith(
-                "https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key"
+                "https://eu.insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key"
             ),
-            f"Expected URL to start with 'https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key', got {call_args[0][0]}",
+            f"Expected URL to start with 'https://eu.insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key', got {call_args[0][0]}",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
@@ -368,8 +368,8 @@ class TestPromptsGet(TestPrompts):
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
         mock_time.return_value = 1000.0
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         # First call
         prompts.get("test-prompt")
@@ -399,8 +399,8 @@ class TestPromptsGet(TestPrompts):
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
         mock_time.return_value = 1000.0
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog, default_cache_ttl_seconds=60)
+        client = self.create_mock_client()
+        prompts = Prompts(client, default_cache_ttl_seconds=60)
 
         # First call
         prompts.get("test-prompt")
@@ -419,20 +419,20 @@ class TestPromptsGet(TestPrompts):
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         prompts.get("prompt with spaces/and/slashes")
 
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.posthog.com/api/environments/@current/llm_prompts/name/prompt%20with%20spaces%2Fand%2Fslashes/?token=phc_test_key",
+            "https://us.insights.hanzo.ai/api/environments/@current/llm_prompts/name/prompt%20with%20spaces%2Fand%2Fslashes/?token=phc_test_key",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
-    def test_work_with_direct_options_no_posthog_client(self, mock_get_session):
-        """Should work with direct options (no PostHog client)."""
+    def test_work_with_direct_options_no_insights_client(self, mock_get_session):
+        """Should work with direct options (no Insights client)."""
         mock_get = mock_get_session.return_value.get
         mock_get.return_value = MockResponse(json_data=self.mock_prompt_response)
 
@@ -446,7 +446,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
+            "https://us.insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
         )
         self.assertEqual(
             call_args[1]["headers"]["Authorization"], "Bearer phx_direct_key"
@@ -461,7 +461,7 @@ class TestPromptsGet(TestPrompts):
         prompts = Prompts(
             personal_api_key="phx_direct_key",
             project_api_key="phc_direct_key",
-            host="https://eu.posthog.com",
+            host="https://eu.insights.hanzo.ai",
         )
 
         prompts.get("test-prompt")
@@ -469,7 +469,7 @@ class TestPromptsGet(TestPrompts):
         call_args = mock_get.call_args
         self.assertEqual(
             call_args[0][0],
-            "https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
+            "https://eu.insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key",
         )
 
     @patch("hanzo_insights.ai.prompts._get_session")
@@ -505,8 +505,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_replace_a_single_variable(self):
         """Should replace a single variable."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile("Hello, {{name}}!", {"name": "World"})
 
@@ -514,8 +514,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_replace_multiple_variables(self):
         """Should replace multiple variables."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile(
             "Hello, {{name}}! Welcome to {{company}}. Your tier is {{tier}}.",
@@ -528,8 +528,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_handle_numbers(self):
         """Should handle numbers."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile("You have {{count}} items.", {"count": 42})
 
@@ -537,8 +537,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_handle_booleans(self):
         """Should handle booleans."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile("Feature enabled: {{enabled}}", {"enabled": True})
 
@@ -546,8 +546,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_leave_unmatched_variables_unchanged(self):
         """Should leave unmatched variables unchanged."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile(
             "Hello, {{name}}! Your {{unknown}} is ready.", {"name": "World"}
@@ -557,8 +557,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_handle_prompts_with_no_variables(self):
         """Should handle prompts with no variables."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile("You are a helpful assistant.", {})
 
@@ -566,8 +566,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_handle_empty_variables_dict(self):
         """Should handle empty variables dict."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile("Hello, {{name}}!", {})
 
@@ -575,8 +575,8 @@ class TestPromptsCompile(TestPrompts):
 
     def test_handle_multiple_occurrences_of_same_variable(self):
         """Should handle multiple occurrences of the same variable."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         result = prompts.compile(
             "Hello, {{name}}! Goodbye, {{name}}!", {"name": "World"}
@@ -620,8 +620,8 @@ class TestPromptsClearCache(TestPrompts):
 
     def test_clear_cache_with_version_and_no_name_raises_value_error(self):
         """Should enforce that versioned cache clearing requires a prompt name."""
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         with self.assertRaises(ValueError) as context:
             prompts.clear_cache(version=1)
@@ -640,8 +640,8 @@ class TestPromptsClearCache(TestPrompts):
             MockResponse(json_data=self.mock_prompt_response),
         ]
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         # Populate cache with two prompts
         prompts.get("test-prompt")
@@ -680,8 +680,8 @@ class TestPromptsClearCache(TestPrompts):
             MockResponse(json_data=versioned_prompt_response),
         ]
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         prompts.get("test-prompt")
         prompts.get("test-prompt", version=1)
@@ -717,8 +717,8 @@ class TestPromptsClearCache(TestPrompts):
             MockResponse(json_data=versioned_prompt_response),
         ]
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         prompts.get("test-prompt")
         prompts.get("test-prompt", version=1)
@@ -743,8 +743,8 @@ class TestPromptsClearCache(TestPrompts):
             MockResponse(json_data=other_prompt_response),
         ]
 
-        posthog = self.create_mock_posthog()
-        prompts = Prompts(posthog)
+        client = self.create_mock_client()
+        prompts = Prompts(client)
 
         # Populate cache with two prompts
         prompts.get("test-prompt")

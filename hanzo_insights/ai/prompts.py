@@ -15,7 +15,7 @@ from hanzo_insights.utils import remove_trailing_slash
 
 log = logging.getLogger("hanzo_insights")
 
-APP_ENDPOINT = "https://us.posthog.com"
+APP_ENDPOINT = "https://us.insights.hanzo.ai"
 DEFAULT_CACHE_TTL_SECONDS = 300  # 5 minutes
 
 PromptVariables = Dict[str, Union[str, int, float, bool]]
@@ -64,14 +64,14 @@ class Prompts:
         from hanzo_insights.ai.prompts import Prompts
 
         # With Insights client
-        client = Insights('phc_xxx', host='https://us.posthog.com', personal_api_key='phx_xxx')
+        client = Insights('phc_xxx', host='https://us.insights.hanzo.ai', personal_api_key='phx_xxx')
         prompts = Prompts(client)
 
         # Or with direct options (no Insights client needed)
         prompts = Prompts(
             personal_api_key='phx_xxx',
             project_api_key='phc_xxx',
-            host='https://us.posthog.com',
+            host='https://us.insights.hanzo.ai',
         )
 
         # Fetch with caching and fallback
@@ -90,7 +90,7 @@ class Prompts:
 
     def __init__(
         self,
-        posthog: Optional[Any] = None,
+        client: Optional[Any] = None,
         *,
         personal_api_key: Optional[str] = None,
         project_api_key: Optional[str] = None,
@@ -101,9 +101,9 @@ class Prompts:
         Initialize Prompts.
 
         Args:
-            posthog: Insights client instance (optional if personal_api_key provided)
-            personal_api_key: Direct personal API key (optional if posthog provided)
-            project_api_key: Direct project API key (optional if posthog provided)
+            client: Insights client instance (optional if personal_api_key provided)
+            personal_api_key: Direct personal API key (optional if client provided)
+            project_api_key: Direct project API key (optional if client provided)
             host: Insights host (defaults to app endpoint)
             default_cache_ttl_seconds: Default cache TTL (defaults to 300)
         """
@@ -112,11 +112,11 @@ class Prompts:
         )
         self._cache: Dict[PromptCacheKey, CachedPrompt] = {}
 
-        if posthog is not None:
-            self._personal_api_key = getattr(posthog, "personal_api_key", None) or ""
-            self._project_api_key = getattr(posthog, "api_key", None) or ""
+        if client is not None:
+            self._personal_api_key = getattr(client, "personal_api_key", None) or ""
+            self._project_api_key = getattr(client, "api_key", None) or ""
             self._host = remove_trailing_slash(
-                getattr(posthog, "raw_host", None) or APP_ENDPOINT
+                getattr(client, "raw_host", None) or APP_ENDPOINT
             )
         else:
             self._personal_api_key = personal_api_key or ""

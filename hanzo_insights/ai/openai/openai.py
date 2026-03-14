@@ -35,16 +35,16 @@ class OpenAI(openai.OpenAI):
 
     _ph_client: InsightsClient
 
-    def __init__(self, posthog_client: Optional[InsightsClient] = None, **kwargs):
+    def __init__(self, insights_client: Optional[InsightsClient] = None, **kwargs):
         """
         Args:
             api_key: OpenAI API key.
-            posthog_client: If provided, events will be captured via this client instead of the global `posthog`.
+            insights_client: If provided, events will be captured via this client instead of the global client.
             **openai_config: Any additional keyword args to set on openai (e.g. organization="xxx").
         """
 
         super().__init__(**kwargs)
-        self._ph_client = posthog_client or setup()
+        self._ph_client = insights_client or setup()
 
         # Store original objects after parent initialization (only if they exist)
         self._original_chat = getattr(self, "chat", None)
@@ -79,34 +79,34 @@ class WrappedResponses:
 
     def create(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
-        if posthog_trace_id is None:
-            posthog_trace_id = str(uuid.uuid4())
+        if insights_trace_id is None:
+            insights_trace_id = str(uuid.uuid4())
 
         if kwargs.get("stream", False):
             return self._create_streaming(
-                posthog_distinct_id,
-                posthog_trace_id,
-                posthog_properties,
-                posthog_privacy_mode,
-                posthog_groups,
+                insights_distinct_id,
+                insights_trace_id,
+                insights_properties,
+                insights_privacy_mode,
+                insights_groups,
                 **kwargs,
             )
 
         return call_llm_and_track_usage(
-            posthog_distinct_id,
+            insights_distinct_id,
             self._client._ph_client,
             "openai",
-            posthog_trace_id,
-            posthog_properties,
-            posthog_privacy_mode,
-            posthog_groups,
+            insights_trace_id,
+            insights_properties,
+            insights_privacy_mode,
+            insights_groups,
             self._client.base_url,
             self._original.create,
             **kwargs,
@@ -114,11 +114,11 @@ class WrappedResponses:
 
     def _create_streaming(
         self,
-        posthog_distinct_id: Optional[str],
-        posthog_trace_id: Optional[str],
-        posthog_properties: Optional[Dict[str, Any]],
-        posthog_privacy_mode: bool,
-        posthog_groups: Optional[Dict[str, Any]],
+        insights_distinct_id: Optional[str],
+        insights_trace_id: Optional[str],
+        insights_properties: Optional[Dict[str, Any]],
+        insights_privacy_mode: bool,
+        insights_groups: Optional[Dict[str, Any]],
         **kwargs: Any,
     ):
         start_time = time.time()
@@ -160,11 +160,11 @@ class WrappedResponses:
                 latency = end_time - start_time
                 output = final_content
                 self._capture_streaming_event(
-                    posthog_distinct_id,
-                    posthog_trace_id,
-                    posthog_properties,
-                    posthog_privacy_mode,
-                    posthog_groups,
+                    insights_distinct_id,
+                    insights_trace_id,
+                    insights_properties,
+                    insights_privacy_mode,
+                    insights_groups,
                     kwargs,
                     usage_stats,
                     latency,
@@ -177,11 +177,11 @@ class WrappedResponses:
 
     def _capture_streaming_event(
         self,
-        posthog_distinct_id: Optional[str],
-        posthog_trace_id: Optional[str],
-        posthog_properties: Optional[Dict[str, Any]],
-        posthog_privacy_mode: bool,
-        posthog_groups: Optional[Dict[str, Any]],
+        insights_distinct_id: Optional[str],
+        insights_trace_id: Optional[str],
+        insights_properties: Optional[Dict[str, Any]],
+        insights_privacy_mode: bool,
+        insights_groups: Optional[Dict[str, Any]],
         kwargs: Dict[str, Any],
         usage_stats: TokenUsage,
         latency: float,
@@ -212,11 +212,11 @@ class WrappedResponses:
             formatted_output=format_openai_streaming_output(output, "responses"),
             usage_stats=usage_stats,
             latency=latency,
-            distinct_id=posthog_distinct_id,
-            trace_id=posthog_trace_id,
-            properties=posthog_properties,
-            privacy_mode=posthog_privacy_mode,
-            groups=posthog_groups,
+            distinct_id=insights_distinct_id,
+            trace_id=insights_trace_id,
+            properties=insights_properties,
+            privacy_mode=insights_privacy_mode,
+            groups=insights_groups,
         )
 
         # Use the common capture function
@@ -224,35 +224,35 @@ class WrappedResponses:
 
     def parse(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
         """
         Parse structured output using OpenAI's 'responses.parse' method, but also track usage in Insights.
 
         Args:
-            posthog_distinct_id: Optional ID to associate with the usage event.
-            posthog_trace_id: Optional trace UUID for linking events.
-            posthog_properties: Optional dictionary of extra properties to include in the event.
-            posthog_privacy_mode: Whether to anonymize the input and output.
-            posthog_groups: Optional dictionary of groups to associate with the event.
+            insights_distinct_id: Optional ID to associate with the usage event.
+            insights_trace_id: Optional trace UUID for linking events.
+            insights_properties: Optional dictionary of extra properties to include in the event.
+            insights_privacy_mode: Whether to anonymize the input and output.
+            insights_groups: Optional dictionary of groups to associate with the event.
             **kwargs: Any additional parameters for the OpenAI Responses Parse API.
 
         Returns:
             The response from OpenAI's responses.parse call.
         """
         return call_llm_and_track_usage(
-            posthog_distinct_id,
+            insights_distinct_id,
             self._client._ph_client,
             "openai",
-            posthog_trace_id,
-            posthog_properties,
-            posthog_privacy_mode,
-            posthog_groups,
+            insights_trace_id,
+            insights_properties,
+            insights_privacy_mode,
+            insights_groups,
             self._client.base_url,
             self._original.parse,
             **kwargs,
@@ -288,34 +288,34 @@ class WrappedCompletions:
 
     def create(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
-        if posthog_trace_id is None:
-            posthog_trace_id = str(uuid.uuid4())
+        if insights_trace_id is None:
+            insights_trace_id = str(uuid.uuid4())
 
         if kwargs.get("stream", False):
             return self._create_streaming(
-                posthog_distinct_id,
-                posthog_trace_id,
-                posthog_properties,
-                posthog_privacy_mode,
-                posthog_groups,
+                insights_distinct_id,
+                insights_trace_id,
+                insights_properties,
+                insights_privacy_mode,
+                insights_groups,
                 **kwargs,
             )
 
         return call_llm_and_track_usage(
-            posthog_distinct_id,
+            insights_distinct_id,
             self._client._ph_client,
             "openai",
-            posthog_trace_id,
-            posthog_properties,
-            posthog_privacy_mode,
-            posthog_groups,
+            insights_trace_id,
+            insights_properties,
+            insights_privacy_mode,
+            insights_groups,
             self._client.base_url,
             self._original.create,
             **kwargs,
@@ -323,11 +323,11 @@ class WrappedCompletions:
 
     def _create_streaming(
         self,
-        posthog_distinct_id: Optional[str],
-        posthog_trace_id: Optional[str],
-        posthog_properties: Optional[Dict[str, Any]],
-        posthog_privacy_mode: bool,
-        posthog_groups: Optional[Dict[str, Any]],
+        insights_distinct_id: Optional[str],
+        insights_trace_id: Optional[str],
+        insights_properties: Optional[Dict[str, Any]],
+        insights_privacy_mode: bool,
+        insights_groups: Optional[Dict[str, Any]],
         **kwargs: Any,
     ):
         start_time = time.time()
@@ -385,11 +385,11 @@ class WrappedCompletions:
                 )
 
                 self._capture_streaming_event(
-                    posthog_distinct_id,
-                    posthog_trace_id,
-                    posthog_properties,
-                    posthog_privacy_mode,
-                    posthog_groups,
+                    insights_distinct_id,
+                    insights_trace_id,
+                    insights_properties,
+                    insights_privacy_mode,
+                    insights_groups,
                     kwargs,
                     usage_stats,
                     latency,
@@ -403,11 +403,11 @@ class WrappedCompletions:
 
     def _capture_streaming_event(
         self,
-        posthog_distinct_id: Optional[str],
-        posthog_trace_id: Optional[str],
-        posthog_properties: Optional[Dict[str, Any]],
-        posthog_privacy_mode: bool,
-        posthog_groups: Optional[Dict[str, Any]],
+        insights_distinct_id: Optional[str],
+        insights_trace_id: Optional[str],
+        insights_properties: Optional[Dict[str, Any]],
+        insights_privacy_mode: bool,
+        insights_groups: Optional[Dict[str, Any]],
         kwargs: Dict[str, Any],
         usage_stats: TokenUsage,
         latency: float,
@@ -439,11 +439,11 @@ class WrappedCompletions:
             formatted_output=format_openai_streaming_output(output, "chat", tool_calls),
             usage_stats=usage_stats,
             latency=latency,
-            distinct_id=posthog_distinct_id,
-            trace_id=posthog_trace_id,
-            properties=posthog_properties,
-            privacy_mode=posthog_privacy_mode,
-            groups=posthog_groups,
+            distinct_id=insights_distinct_id,
+            trace_id=insights_trace_id,
+            properties=insights_properties,
+            privacy_mode=insights_privacy_mode,
+            groups=insights_groups,
         )
 
         # Use the common capture function
@@ -463,30 +463,30 @@ class WrappedEmbeddings:
 
     def create(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
         """
         Create an embedding using OpenAI's 'embeddings.create' method, but also track usage in Insights.
 
         Args:
-            posthog_distinct_id: Optional ID to associate with the usage event.
-            posthog_trace_id: Optional trace UUID for linking events.
-            posthog_properties: Optional dictionary of extra properties to include in the event.
-            posthog_privacy_mode: Whether to anonymize the input and output.
-            posthog_groups: Optional dictionary of groups to associate with the event.
+            insights_distinct_id: Optional ID to associate with the usage event.
+            insights_trace_id: Optional trace UUID for linking events.
+            insights_properties: Optional dictionary of extra properties to include in the event.
+            insights_privacy_mode: Whether to anonymize the input and output.
+            insights_groups: Optional dictionary of groups to associate with the event.
             **kwargs: Any additional parameters for the OpenAI Embeddings API.
 
         Returns:
             The response from OpenAI's embeddings.create call.
         """
 
-        if posthog_trace_id is None:
-            posthog_trace_id = str(uuid.uuid4())
+        if insights_trace_id is None:
+            insights_trace_id = str(uuid.uuid4())
 
         start_time = time.time()
         response = self._original.create(**kwargs)
@@ -508,27 +508,27 @@ class WrappedEmbeddings:
             "$ai_model": kwargs.get("model"),
             "$ai_input": with_privacy_mode(
                 self._client._ph_client,
-                posthog_privacy_mode,
+                insights_privacy_mode,
                 sanitize_openai_response(kwargs.get("input")),
             ),
             "$ai_http_status": 200,
             "$ai_input_tokens": usage_stats.get("prompt_tokens", 0),
             "$ai_latency": latency,
-            "$ai_trace_id": posthog_trace_id,
+            "$ai_trace_id": insights_trace_id,
             "$ai_base_url": str(self._client.base_url),
-            **(posthog_properties or {}),
+            **(insights_properties or {}),
         }
 
-        if posthog_distinct_id is None:
+        if insights_distinct_id is None:
             event_properties["$process_person_profile"] = False
 
         # Send capture event for embeddings
         if hasattr(self._client._ph_client, "capture"):
             self._client._ph_client.capture(
-                distinct_id=posthog_distinct_id or posthog_trace_id,
+                distinct_id=insights_distinct_id or insights_trace_id,
                 event="$ai_embedding",
                 properties=event_properties,
-                groups=posthog_groups,
+                groups=insights_groups,
             )
 
         return response
@@ -579,21 +579,21 @@ class WrappedBetaCompletions:
 
     def parse(
         self,
-        posthog_distinct_id: Optional[str] = None,
-        posthog_trace_id: Optional[str] = None,
-        posthog_properties: Optional[Dict[str, Any]] = None,
-        posthog_privacy_mode: bool = False,
-        posthog_groups: Optional[Dict[str, Any]] = None,
+        insights_distinct_id: Optional[str] = None,
+        insights_trace_id: Optional[str] = None,
+        insights_properties: Optional[Dict[str, Any]] = None,
+        insights_privacy_mode: bool = False,
+        insights_groups: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ):
         return call_llm_and_track_usage(
-            posthog_distinct_id,
+            insights_distinct_id,
             self._client._ph_client,
             "openai",
-            posthog_trace_id,
-            posthog_properties,
-            posthog_privacy_mode,
-            posthog_groups,
+            insights_trace_id,
+            insights_properties,
+            insights_privacy_mode,
+            insights_groups,
             self._client.base_url,
             self._original.parse,
             **kwargs,

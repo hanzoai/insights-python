@@ -6,7 +6,7 @@ using Redis for multi-instance deployments (leader election pattern).
 
 Usage:
     import redis
-    from hanzo_insights import Posthog
+    from hanzo_insights import Insights
 
     redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
     cache = RedisFlagCache(redis_client, service_key="my-service")
@@ -83,8 +83,8 @@ class RedisFlagCache(FlagDefinitionCacheProvider):
                          Examples: "my-api-prod", "checkout-service", "staging".
 
         Redis Keys Created:
-            - posthog:flags:{service_key} - Cached flag definitions (JSON)
-            - posthog:flags:{service_key}:lock - Leader election lock
+            - insights:flags:{service_key} - Cached flag definitions (JSON)
+            - insights:flags:{service_key}:lock - Leader election lock
 
         Example:
             redis_client = redis.Redis(
@@ -95,8 +95,8 @@ class RedisFlagCache(FlagDefinitionCacheProvider):
             cache = RedisFlagCache(redis_client, service_key="my-api-prod")
         """
         self._redis = redis
-        self._cache_key = f"posthog:flags:{service_key}"
-        self._lock_key = f"posthog:flags:{service_key}:lock"
+        self._cache_key = f"insights:flags:{service_key}"
+        self._lock_key = f"insights:flags:{service_key}:lock"
         self._instance_id = str(uuid.uuid4())
         self._try_lead = self._redis.register_script(self._LUA_TRY_LEAD)
         self._stop_lead = self._redis.register_script(self._LUA_STOP_LEAD)

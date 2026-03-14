@@ -1108,7 +1108,7 @@ class Client(object):
 
         if not msg.get("properties"):
             msg["properties"] = {}
-        msg["properties"]["$lib"] = "posthog-python"
+        msg["properties"]["$lib"] = "insights-python"
         msg["properties"]["$lib_version"] = VERSION
 
         if disable_geoip is None:
