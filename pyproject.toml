@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
+    # All runtime deps are pure-Python — fully compatible with free-threaded 3.13t.
     "requests>=2.7,<3.0",
     "six>=1.5",
     "python-dateutil>=2.2",
