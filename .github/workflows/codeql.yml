@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: 'ubuntu-latest'
+    runs-on: hanzo-build-linux-amd64
     permissions:
       security-events: write
       # required to fetch internal or private CodeQL packs
