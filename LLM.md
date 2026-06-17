@@ -1,4 +1,4 @@
-# LLM.md - Hanzo Insights Python SDK
+# Hanzo Insights Python SDK
 
 ## Overview
 Integrate Hanzo Insights into any Python application. Package name: `hanzo-insights` on PyPI.
