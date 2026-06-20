@@ -18,7 +18,7 @@ concurrency:
 jobs:
   check-release-label:
     name: Check for release label
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     # Run when PR with 'release' label is merged to master
     if: |
       github.event_name == 'workflow_dispatch' ||
@@ -61,7 +61,7 @@ jobs:
   release:
     name: Release and publish
     needs: [check-release-label, notify-approval-needed]
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     # Use `always()` to ensure the job runs even if notify-approval-needed is skipped,
     # but still depend on it to access `needs.notify-approval-needed.outputs.slack_ts`
     if: always() && needs.check-release-label.outputs.should-release == 'true'
@@ -233,7 +233,7 @@ jobs:
   notify-released:
     name: Notify Slack - Released
     needs: [check-release-label, notify-approval-needed, release]
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     if: always() && needs.release.result == 'success' && needs.notify-approval-needed.outputs.slack_ts != ''
     steps:
       - name: Checkout repository
