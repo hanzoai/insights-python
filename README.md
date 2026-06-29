@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="insights-python" width="880"></p>
+
 # Hanzo Insights Python SDK
 
 Integrate [Hanzo Insights](https://insights.hanzo.ai) into any Python application.
