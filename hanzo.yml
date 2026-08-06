@@ -1,0 +1,24 @@
+# Python client for Hanzo Insights — published to PyPI from a tag.
+#
+# Gate: the package installs with its own `test` extra and the suites that need
+# no network run for real. The rest of hanzo_insights/test/ mocks a live ingest
+# endpoint or imports an LLM vendor SDK (openai, anthropic, langchain, gemini) —
+# those belong to the vendor-matrix lane, not to a push.
+test:
+  - name: unit
+    run: |
+      set -euo pipefail
+      command -v uv > /dev/null 2>&1 || {
+        curl -fsSL https://astral.sh/uv/install.sh | sh
+        export PATH="$HOME/.local/bin:$PATH"
+      }
+      uv venv .venv
+      . .venv/bin/activate
+      uv pip install -e ".[test]"
+      python -m pytest -q -p no:cacheprovider \
+        hanzo_insights/test/test_utils.py \
+        hanzo_insights/test/test_types.py \
+        hanzo_insights/test/test_size_limited_dict.py \
+        hanzo_insights/test/test_contexts.py \
+        hanzo_insights/test/test_before_send.py \
+        hanzo_insights/test/test_feature_flag_result.py
