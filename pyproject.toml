@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hanzo-insights"
-version = "7.9.7"
+version = "7.9.8"
 description = "Integrate Hanzo Insights into any python application."
 authors = [{ name = "Hanzo AI", email = "hey@hanzo.ai" }]
 maintainers = [{ name = "Hanzo AI", email = "hey@hanzo.ai" }]

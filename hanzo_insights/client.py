@@ -44,6 +44,7 @@ from hanzo_insights.flag_definition_cache import (
     FlagDefinitionCacheData,
     FlagDefinitionCacheProvider,
 )
+from hanzo_insights.metrics_capture import InsightsMetrics
 from hanzo_insights.poller import Poller
 from hanzo_insights.request import (
     DEFAULT_HOST,
@@ -254,6 +255,7 @@ class Client(object):
         self.enable_exception_autocapture = enable_exception_autocapture
         self.log_captured_exceptions = log_captured_exceptions
         self.exception_capture = None
+        self.metrics = InsightsMetrics(self)
         self.privacy_mode = privacy_mode
         self.enable_local_evaluation = enable_local_evaluation
 
