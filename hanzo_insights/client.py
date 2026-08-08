@@ -2,6 +2,7 @@ import atexit
 import logging
 import os
 import sys
+import threading
 import warnings
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
@@ -201,6 +202,7 @@ class Client(object):
         code_variables_mask_patterns=None,
         code_variables_ignore_patterns=None,
         in_app_modules: list[str] | None = None,
+        metrics: Optional[dict] = None,
     ):
         """
         Initialize a new Insights client instance.
@@ -255,7 +257,9 @@ class Client(object):
         self.enable_exception_autocapture = enable_exception_autocapture
         self.log_captured_exceptions = log_captured_exceptions
         self.exception_capture = None
-        self.metrics = InsightsMetrics(self)
+        self._metrics_config = metrics
+        self._metrics: Optional[InsightsMetrics] = None
+        self._metrics_lock = threading.Lock()
         self.privacy_mode = privacy_mode
         self.enable_local_evaluation = enable_local_evaluation
 
@@ -1164,6 +1168,41 @@ class Client(object):
             self.log.warning("analytics-python queue is full")
             return None
 
+    @property
+    def metrics(self) -> InsightsMetrics:
+        """
+        The `hanzo_insights.metrics` API: a statsd-style pre-aggregating metrics client — alpha.
+
+        Samples fold into per-series aggregates in memory and flush as one OTLP
+        data point per series per window, so recording from hot paths is cheap.
+        Configure via the `metrics` client option; pending metrics flush on
+        `shutdown()`.
+
+        Examples:
+            ```python
+            client = Insights('<ph_project_api_key>', metrics={"service_name": "billing-worker"})
+            client.metrics.count("invoices.processed", 1, attributes={"plan": "pro"})
+            client.metrics.gauge("queue.depth", 42)
+            client.metrics.histogram("job.duration", 187, unit="ms")
+            ```
+        """
+        if self._metrics is None:
+            with self._metrics_lock:
+                if self._metrics is None:
+                    # Same no-throw semantics as the rest of the public client surface:
+                    # a bad metrics config degrades to defaults instead of raising from
+                    # the first chained metrics.count() call (raise only in debug mode).
+                    try:
+                        self._metrics = InsightsMetrics(self, self._metrics_config)
+                    except Exception as e:
+                        if self.debug:
+                            raise e
+                        self.log.exception(
+                            f"Error initializing metrics, using default configuration: {e}"
+                        )
+                        self._metrics = InsightsMetrics(self, None)
+        return self._metrics
+
     def flush(self):
         """
         Force a flush from the internal queue to the server. Do not use directly, call `shutdown()` instead.
@@ -1218,6 +1257,9 @@ class Client(object):
             ```
         """
         self.flush()
+        if self._metrics is not None:
+            self._metrics.flush()
+            self._metrics.reset()
         self.join()
 
         if self.exception_capture:
