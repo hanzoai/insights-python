@@ -21,4 +21,5 @@ test:
         hanzo_insights/test/test_size_limited_dict.py \
         hanzo_insights/test/test_contexts.py \
         hanzo_insights/test/test_before_send.py \
-        hanzo_insights/test/test_feature_flag_result.py
+        hanzo_insights/test/test_feature_flag_result.py \
+        hanzo_insights/test/test_metrics_capture.py
