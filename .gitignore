@@ -20,3 +20,8 @@ pyrightconfig.json
 .DS_Store
 posthog-python-references.json
 .claude/settings.local.json
+
+# Local symlinks to LLM.md
+CLAUDE.md
+AGENTS.md
+GEMINI.md
